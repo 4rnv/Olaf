@@ -10,7 +10,8 @@ const App = () => {
     const [currentModel, setCurrentModel] = useState('')
     const [stats, setStats] = useState('')
     const [typingText, setTypingText] = useState('')
-
+    const [activeChatId, setActiveChatId] = useState<string>(Date.now().toString())
+    const [chatSessions, setChatSessions] = useState<{id: string, title: string}[]>([])
     const [sidebarOpen, setSidebarOpen] = useState(true)
 
     const displayTypewriter = (text: string, callback?: () => void) => {
@@ -39,7 +40,7 @@ const App = () => {
         setChatHistory(updatedChat)
         setCurrentPrompt('')
         setStats('')
-        localStorage.setItem('chatHistory', JSON.stringify(updatedChat))
+        localStorage.setItem(activeChatId!, JSON.stringify(updatedChat))
 
         const payload = {
             model: currentModel,
@@ -62,15 +63,37 @@ const App = () => {
             }
 
             displayTypewriter(assistantReply, () => {
-                // setChatHistory((prevHistory) => [...prevHistory, { role: 'assistant', content: assistantReply }])
                 const newChatHistory = [...updatedChat, { role: 'assistant', content: assistantReply }]
                 setChatHistory(newChatHistory)
-                localStorage.setItem('chatHistory', JSON.stringify(newChatHistory))
+                localStorage.setItem(activeChatId!, JSON.stringify(newChatHistory))
                 setTypingText('')
             })
         } catch (error) {
             console.error("Error generating response:", error)
         }
+    }
+
+    const createNewChat = () => {
+        const newChatId = Date.now().toString()
+        const newChatTitle = `Chat ${new Date().toLocaleString()}`
+        setChatSessions(prev => [...prev,{id:newChatId, title: newChatTitle}])
+        setActiveChatId(newChatId)
+        setChatHistory([])
+        setCurrentPrompt('')
+        localStorage.setItem(newChatId, JSON.stringify([]))
+    }
+
+    const loadChatSession = (chatId: string) => {
+        const savedChatHistory = localStorage.getItem(chatId)
+        if(savedChatHistory) {
+            const parsedHistory = JSON.parse(savedChatHistory)
+            setChatHistory(parsedHistory)
+        }
+        else {
+            setChatHistory([])
+        }
+        setActiveChatId(chatId)
+        setStats('')
     }
 
     useEffect(() => {
@@ -90,26 +113,32 @@ const App = () => {
                 setLoading(false)
             }
         }
-        const savedChatHistory = localStorage.getItem('chatHistory')
-        if (savedChatHistory) {
-            setChatHistory(JSON.parse(savedChatHistory))
+        const savedChatSessions = Object.keys(localStorage).filter(key => key !== 'selectedModel').map(key => ({id:key, title: `Chat ${new Date(parseInt(key)).toLocaleString()}`}))
+        setChatSessions(savedChatSessions)
+        if(savedChatSessions.length > 0) {
+            loadChatSession(savedChatSessions[0].id) //this needs to be changed
         }
 
         fetchModels()
     }, [])
 
     return (
-        <div className="flex h-screen overflow-hidden bg-blue-500">
+        <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
             <div className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-gray-900 text-white transition-all duration-300 flex flex-col`}>
-                <div className="p-4 font-bold text-lg border-b border-gray-700 flex justify-between items-center">
-                    Menu
-                    <button onClick={() => setSidebarOpen(false)} className="text-sm bg-gray-700 px-2 py-1 rounded hover:bg-gray-600">
+                <div className="p-4 font-bold text-lg border-b border-gray-700 flex justify-between items-center">Olaf
+                    <button onClick={() => setSidebarOpen(false)} className="text-sm bg-gray-700 px-2 py-1 hover:bg-gray-600">
                         Hide
                     </button>
                 </div>
                 <div className="p-4">
-                    <p className="text-gray-400">...</p>
+                    <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-pink-700 text-white font-semibold px-4 py-2 mb-2">New Chat</button>
+                    <h2 className="text-lg font-semibold">History</h2>
+                    <ul className="mt-2">
+                        {chatSessions.map(session => (
+                            <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded" onClick={() => loadChatSession(session.id)}>{session.title}</li>
+                        ))}
+                    </ul>
                 </div>
             </div>
 
@@ -126,7 +155,7 @@ const App = () => {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {chatHistory.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}>
+                            <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-gray-500 text-white' : 'bg-gray-300 text-black'}`}>
                                 {msg.content}
                             </div>
                         </div>
@@ -140,6 +169,7 @@ const App = () => {
                     )}
                 </div>
                 <div className="text-gray-500 text-xs mt-1">{stats}</div>
+                
                 {/* Footer */}
                 <div className="border-t p-2 bg-white flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -157,7 +187,7 @@ const App = () => {
                             )}
                         </select>
                         <textarea className="border rounded px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}/>
-                        <button onClick={handleSendRequest} className="h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 rounded transition">Send</button>
+                        <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-pink-700 text-white font-semibold px-6 rounded transition">Send</button>
                     </div>
                 </div>
             </div>

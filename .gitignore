@@ -4,4 +4,4 @@ dist
 *.local
 .vscode/*
 TODO.txt
-*new.js
+*new.tsx
