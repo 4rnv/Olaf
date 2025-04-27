@@ -78,6 +78,7 @@ const App = () => {
         const newChatTitle = `Chat ${new Date().toLocaleString()}`
         setChatSessions(prev => [...prev,{id:newChatId, title: newChatTitle}])
         setActiveChatId(newChatId)
+        setStats('')
         setChatHistory([])
         setCurrentPrompt('')
         localStorage.setItem(newChatId, JSON.stringify([]))
@@ -96,6 +97,23 @@ const App = () => {
         setStats('')
     }
 
+    const deleteSession = (chatId: string) => {
+        if(window.confirm(`Are you sure you want to delete session ${chatId}?`)) {
+        window.localStorage.removeItem(chatId)
+        setChatSessions(prev => prev.filter(item => item.id !== chatId))
+        }
+    }
+
+    const deleteAllSessions = () => {
+        if (window.confirm("Are you sure you want to delete all chat sessions? This action is irreversible.")) {
+            localStorage.clear()
+            setChatSessions([])
+            setChatHistory([])
+            setActiveChatId(Date.now().toString())
+        }
+    }
+    
+
     useEffect(() => {
         const fetchModels = async () => {
             try {
@@ -113,10 +131,12 @@ const App = () => {
                 setLoading(false)
             }
         }
-        const savedChatSessions = Object.keys(localStorage).filter(key => key !== 'selectedModel').map(key => ({id:key, title: `Chat ${new Date(parseInt(key)).toLocaleString()}`}))
+        const savedChatSessions = Object.keys(localStorage).filter(key => key !== 'selectedModel').map(key => ({id:key, title: `Chat ${new Date(parseInt(key)).toLocaleString()}`})) // this also needs to be changed, ends up getting unrelated keys
         setChatSessions(savedChatSessions)
         if(savedChatSessions.length > 0) {
             loadChatSession(savedChatSessions[0].id) //this needs to be changed
+        } else {
+            setChatHistory([])
         }
 
         fetchModels()
@@ -131,14 +151,19 @@ const App = () => {
                         Hide
                     </button>
                 </div>
-                <div className="p-4">
+                <div className="p-4 h-[100%] flex flex-col content-between justify-between items-stretch">
+                    <div>
                     <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-pink-700 text-white font-semibold px-4 py-2 mb-2">New Chat</button>
                     <h2 className="text-lg font-semibold">History</h2>
                     <ul className="mt-2">
                         {chatSessions.map(session => (
-                            <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded" onClick={() => loadChatSession(session.id)}>{session.title}</li>
+                            <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded text-xs" onClick={() => loadChatSession(session.id)}>{session.title}<button onClick={() => deleteSession(session.id)} className="ml-2 text-red-500 hover:bg-red-800 hover:cursor-pointer hover:text-white p-1">Delete</button></li>
                         ))}
                     </ul>
+                    </div>
+                    <div>
+                    <button onClick={deleteAllSessions} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 mt-4">Delete All Sessions</button>
+                    </div>
                 </div>
             </div>
 
@@ -153,7 +178,7 @@ const App = () => {
                     )}
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {chatHistory.map((msg, index) => (
+                    {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-gray-500 text-white' : 'bg-gray-300 text-black'}`}>
                                 {msg.content}
