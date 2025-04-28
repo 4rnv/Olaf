@@ -13,8 +13,13 @@ const App = () => {
     const [username, setUsername] = useState('Anonymous')
     const [activeChatId, setActiveChatId] = useState<string>(`olaf-session-${Date.now().toString()}`)
     const [chatSessions, setChatSessions] = useState<{id: string, title: string}[]>([])
+    const [userAvatar, setUserAvatar] = useState<string | null>(null)
+    const [botAvatar, setBotAvatar] = useState<string | null>(null)
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [showUsername, setShowUsername] = useState(true)
+    const [showAvatars, setShowAvatars] = useState(true)
+    const [settingsExpanded, setSettingsExpanded] = useState(false)
+
 
     const displayTypewriter = (text: string, callback?: () => void) => {
         let i = 0
@@ -194,11 +199,16 @@ const App = () => {
                         ))}
                     </ul>
                     </div>
-                    <div id="settings">
-                    <button onClick={deleteAllSessions} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 mt-4">Delete All Sessions</button>
-                    <button onClick={handleUsername} className="w-full text-white font-semibold px-4 py-2 mt-4">Set Username</button>
-                    <button onClick={() => setShowUsername(prev => !prev)} className="w-full text-white font-semibold px-4 py-2 mt-4">{showUsername ? 'Hide Username' : 'Show Username'}</button>
-
+                    <div id="settings" className="flex flex-col">
+                        <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 mt-4 flex justify-between items-center">Settings {settingsExpanded ? "▼" : "▲"}</button>
+                        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${settingsExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+                            <div className="flex flex-col gap-2 mt-4">
+                                <button onClick={deleteAllSessions} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded">Delete All Sessions</button>
+                                <button onClick={handleUsername} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">Set Username</button>
+                                <button onClick={() => setShowUsername(prev => !prev)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">{showUsername ? "Hide Username" : "Show Username"}</button>
+                                <button onClick={() => setShowAvatars(prev => !prev)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">{showAvatars ? "Hide Avatars" : "Show Avatars"}</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -215,14 +225,20 @@ const App = () => {
                         </button>
                     )}
                 </div>
+
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
-                        <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
+                            {showAvatars && msg.role === 'assistant' && (<img src="/bot-avatar.png" alt="Bot" className="w-16 h-16 border-black border rounded-4xl" />)}
+
                             <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-gray-500 text-white' : 'bg-gray-300 text-black'}`}>
                                 {msg.content}
                             </div>
+
+                            {showAvatars && msg.role === 'user' && (<img src="/user-avatar.png" alt="(You)" className="w-16 h-16 border-black border rounded-full" />)}
                         </div>
                     ))}
+
                     {typingText && (
                         <div className="flex justify-start">
                             <div className="max-w-[60%] px-4 py-2 rounded-lg shadow bg-gray-300 text-black">

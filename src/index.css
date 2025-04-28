@@ -1,4 +1,9 @@
 * {
   border-radius: 0 !important;
   border: none !important;
+  transition: all 0.3s;
+}
+
+img {
+  border-radius: 1000px !important;
 }
