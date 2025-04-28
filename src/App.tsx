@@ -10,9 +10,11 @@ const App = () => {
     const [currentModel, setCurrentModel] = useState('')
     const [stats, setStats] = useState('')
     const [typingText, setTypingText] = useState('')
-    const [activeChatId, setActiveChatId] = useState<string>(Date.now().toString())
+    const [username, setUsername] = useState('Anonymous')
+    const [activeChatId, setActiveChatId] = useState<string>(`olaf-session-${Date.now().toString()}`)
     const [chatSessions, setChatSessions] = useState<{id: string, title: string}[]>([])
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [showUsername, setShowUsername] = useState(true)
 
     const displayTypewriter = (text: string, callback?: () => void) => {
         let i = 0
@@ -74,9 +76,10 @@ const App = () => {
     }
 
     const createNewChat = () => {
-        const newChatId = Date.now().toString()
-        const newChatTitle = `Chat ${new Date().toLocaleString()}`
-        setChatSessions(prev => [...prev,{id:newChatId, title: newChatTitle}])
+        const timestamp = Date.now()
+        const newChatId = `olaf-session-${timestamp}`
+        const newChatTitle = `Chat ${new Date(timestamp).toLocaleString()}`
+        setChatSessions(prev => [...prev,{id:newChatId, title: newChatTitle, timestamp: timestamp}])
         setActiveChatId(newChatId)
         setStats('')
         setChatHistory([])
@@ -113,6 +116,16 @@ const App = () => {
         }
     }
     
+    const handleUsername = () => {
+        const input = window.prompt("Enter Username (Leave empty to remove)")
+        if (input && input.trim() !== '') {
+            setUsername(input.trim())
+            localStorage.setItem('olaf-username', input.trim())
+        } else {
+            setUsername('Anonymous')
+            localStorage.removeItem('olaf-username')
+        }
+    }    
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -131,12 +144,32 @@ const App = () => {
                 setLoading(false)
             }
         }
-        const savedChatSessions = Object.keys(localStorage).filter(key => key !== 'selectedModel').map(key => ({id:key, title: `Chat ${new Date(parseInt(key)).toLocaleString()}`})) // this also needs to be changed, ends up getting unrelated keys
+
+        const savedChatSessions = Object.keys(localStorage)
+        .filter(key => key.startsWith('olaf-session-'))
+        .map(key => {
+            const timestamp = key.replace('olaf-session-', '')
+            return {
+                id: key,
+                title: `Chat ${new Date(parseInt(timestamp)).toLocaleString()}`,
+                timestamp: parseInt(timestamp)
+            }
+        }).sort((a, b) => b.timestamp - a.timestamp)
+        console.log('Saved Chat Sessions: ', savedChatSessions)
         setChatSessions(savedChatSessions)
         if(savedChatSessions.length > 0) {
-            loadChatSession(savedChatSessions[0].id) //this needs to be changed
+            loadChatSession(savedChatSessions[0].id)
         } else {
+            console.log("No chats loaded")
             setChatHistory([])
+        }
+
+        const savedUsername = localStorage.getItem('olaf-username')
+        if (savedUsername) {
+            setUsername(savedUsername)
+        }
+        else {
+            setUsername('Anonymous')
         }
 
         fetchModels()
@@ -161,8 +194,11 @@ const App = () => {
                         ))}
                     </ul>
                     </div>
-                    <div>
+                    <div id="settings">
                     <button onClick={deleteAllSessions} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 mt-4">Delete All Sessions</button>
+                    <button onClick={handleUsername} className="w-full text-white font-semibold px-4 py-2 mt-4">Set Username</button>
+                    <button onClick={() => setShowUsername(prev => !prev)} className="w-full text-white font-semibold px-4 py-2 mt-4">{showUsername ? 'Hide Username' : 'Show Username'}</button>
+
                     </div>
                 </div>
             </div>
@@ -170,7 +206,9 @@ const App = () => {
             {/* Chat Area */}
             <div className="flex-1 flex flex-col bg-gray-100">
                 <div className="flex items-center justify-between p-4 bg-white border-b">
-                    <h1 className="text-2xl font-bold">Ollama Frontend</h1>
+                    {showUsername && (
+                        <h2 className="text-2xl font-light">Hello, {username ? username : 'Anonymous'}</h2>
+                    )}
                     {!sidebarOpen && (
                         <button onClick={() => setSidebarOpen(true)} className="text-sm bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">
                             Open Menu
