@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import { Model, ApiResponse } from './Interfaces'
 import './App.css'
 
@@ -12,7 +12,7 @@ const App = () => {
     const [typingText, setTypingText] = useState('')
     const [username, setUsername] = useState('Anonymous')
     const [activeChatId, setActiveChatId] = useState<string>(`olaf-session-${Date.now().toString()}`)
-    const [chatSessions, setChatSessions] = useState<{id: string, title: string}[]>([])
+    const [chatSessions, setChatSessions] = useState<{ id: string, title: string }[]>([])
     const [userAvatar, setUserAvatar] = useState<string | null>(null)
     const [botAvatar, setBotAvatar] = useState<string | null>(null)
     const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -84,7 +84,7 @@ const App = () => {
         const timestamp = Date.now()
         const newChatId = `olaf-session-${timestamp}`
         const newChatTitle = `Chat ${new Date(timestamp).toLocaleString()}`
-        setChatSessions(prev => [...prev,{id:newChatId, title: newChatTitle, timestamp: timestamp}])
+        setChatSessions(prev => [...prev, { id: newChatId, title: newChatTitle, timestamp: timestamp }])
         setActiveChatId(newChatId)
         setStats('')
         setChatHistory([])
@@ -94,7 +94,7 @@ const App = () => {
 
     const loadChatSession = (chatId: string) => {
         const savedChatHistory = localStorage.getItem(chatId)
-        if(savedChatHistory) {
+        if (savedChatHistory) {
             const parsedHistory = JSON.parse(savedChatHistory)
             setChatHistory(parsedHistory)
         }
@@ -106,9 +106,9 @@ const App = () => {
     }
 
     const deleteSession = (chatId: string) => {
-        if(window.confirm(`Are you sure you want to delete session ${chatId}?`)) {
-        window.localStorage.removeItem(chatId)
-        setChatSessions(prev => prev.filter(item => item.id !== chatId))
+        if (window.confirm(`Are you sure you want to delete session ${chatId}?`)) {
+            window.localStorage.removeItem(chatId)
+            setChatSessions(prev => prev.filter(item => item.id !== chatId))
         }
     }
 
@@ -120,7 +120,7 @@ const App = () => {
             setActiveChatId(Date.now().toString())
         }
     }
-    
+
     const handleUsername = () => {
         const input = window.prompt("Enter Username (Leave empty to remove)")
         if (input && input.trim() !== '') {
@@ -130,7 +130,33 @@ const App = () => {
             setUsername('Anonymous')
             localStorage.removeItem('olaf-username')
         }
-    }    
+    }
+
+    const handleBotAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0]
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                const base64string = reader.result as string
+                setBotAvatar(base64string)
+                localStorage.setItem('olaf-bot-avatar', base64string)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
+    const handleUserAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0]
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                const base64string = reader.result as string
+                setUserAvatar(base64string)
+                localStorage.setItem('olaf-user-avatar', base64string)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -151,18 +177,18 @@ const App = () => {
         }
 
         const savedChatSessions = Object.keys(localStorage)
-        .filter(key => key.startsWith('olaf-session-'))
-        .map(key => {
-            const timestamp = key.replace('olaf-session-', '')
-            return {
-                id: key,
-                title: `Chat ${new Date(parseInt(timestamp)).toLocaleString()}`,
-                timestamp: parseInt(timestamp)
-            }
-        }).sort((a, b) => b.timestamp - a.timestamp)
+            .filter(key => key.startsWith('olaf-session-'))
+            .map(key => {
+                const timestamp = key.replace('olaf-session-', '')
+                return {
+                    id: key,
+                    title: `Chat ${new Date(parseInt(timestamp)).toLocaleString()}`,
+                    timestamp: parseInt(timestamp)
+                }
+            }).sort((a, b) => b.timestamp - a.timestamp)
         console.log('Saved Chat Sessions: ', savedChatSessions)
         setChatSessions(savedChatSessions)
-        if(savedChatSessions.length > 0) {
+        if (savedChatSessions.length > 0) {
             loadChatSession(savedChatSessions[0].id)
         } else {
             console.log("No chats loaded")
@@ -176,6 +202,11 @@ const App = () => {
         else {
             setUsername('Anonymous')
         }
+
+        const savedUserAvatar = localStorage.getItem('olaf-user-avatar')
+        const savedBotAvatar = localStorage.getItem('olaf-bot-avatar')
+        if (savedUserAvatar) setUserAvatar(savedUserAvatar)
+        if (savedBotAvatar) setBotAvatar(savedBotAvatar)
 
         fetchModels()
     }, [])
@@ -191,13 +222,13 @@ const App = () => {
                 </div>
                 <div className="p-4 h-[100%] flex flex-col content-between justify-between items-stretch">
                     <div>
-                    <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-pink-700 text-white font-semibold px-4 py-2 mb-2">New Chat</button>
-                    <h2 className="text-lg font-semibold">History</h2>
-                    <ul className="mt-2">
-                        {chatSessions.map(session => (
-                            <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded text-xs" onClick={() => loadChatSession(session.id)}>{session.title}<button onClick={() => deleteSession(session.id)} className="ml-2 text-red-500 hover:bg-red-800 hover:cursor-pointer hover:text-white p-1">Delete</button></li>
-                        ))}
-                    </ul>
+                        <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-pink-700 text-white font-semibold px-4 py-2 mb-2">New Chat</button>
+                        <h2 className="text-lg font-semibold">History</h2>
+                        <ul className="mt-2">
+                            {chatSessions.map(session => (
+                                <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded text-xs" onClick={() => loadChatSession(session.id)}>{session.title}<button onClick={() => deleteSession(session.id)} className="ml-2 text-red-500 hover:bg-red-800 hover:cursor-pointer hover:text-white p-1">Delete</button></li>
+                            ))}
+                        </ul>
                     </div>
                     <div id="settings" className="flex flex-col">
                         <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 mt-4 flex justify-between items-center">Settings {settingsExpanded ? "▼" : "▲"}</button>
@@ -206,6 +237,8 @@ const App = () => {
                                 <button onClick={deleteAllSessions} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded">Delete All Sessions</button>
                                 <button onClick={handleUsername} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">Set Username</button>
                                 <button onClick={() => setShowUsername(prev => !prev)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">{showUsername ? "Hide Username" : "Show Username"}</button>
+                                <label className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded text-center cursor-pointer">Upload User Avatar<input type="file" accept="image/*" onChange={handleUserAvatarUpload} className="hidden" /></label>
+                                <label className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded text-center cursor-pointer">Upload Bot Avatar<input type="file" accept="image/*" onChange={handleBotAvatarUpload} className="hidden" /></label>
                                 <button onClick={() => setShowAvatars(prev => !prev)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">{showAvatars ? "Hide Avatars" : "Show Avatars"}</button>
                             </div>
                         </div>
@@ -229,13 +262,13 @@ const App = () => {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
-                            {showAvatars && msg.role === 'assistant' && (<img src="/bot-avatar.png" alt="Bot" className="w-16 h-16 border-black border rounded-4xl" />)}
+                            {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 border-black border rounded-4xl" />)}
 
                             <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-gray-500 text-white' : 'bg-gray-300 text-black'}`}>
                                 {msg.content}
                             </div>
 
-                            {showAvatars && msg.role === 'user' && (<img src="/user-avatar.png" alt="(You)" className="w-16 h-16 border-black border rounded-full" />)}
+                            {showAvatars && msg.role === 'user' && (<img src={userAvatar || "/user-avatar.png"} alt="(You)" className="w-16 h-16 border-black border rounded-full" />)}
                         </div>
                     ))}
 
@@ -248,7 +281,7 @@ const App = () => {
                     )}
                 </div>
                 <div className="text-gray-500 text-xs mt-1">{stats}</div>
-                
+
                 {/* Footer */}
                 <div className="border-t p-2 bg-white flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -265,7 +298,7 @@ const App = () => {
                                 ))
                             )}
                         </select>
-                        <textarea className="border rounded px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}/>
+                        <textarea className="border rounded px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)} />
                         <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-pink-700 text-white font-semibold px-6 rounded transition">Send</button>
                     </div>
                 </div>
