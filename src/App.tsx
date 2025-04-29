@@ -19,7 +19,7 @@ const App = () => {
     const [showUsername, setShowUsername] = useState(true)
     const [showAvatars, setShowAvatars] = useState(true)
     const [settingsExpanded, setSettingsExpanded] = useState(false)
-
+    const [activeDownloadTooltip, setActiveDownloadTooltip] = useState<string | null>(null)
 
     const displayTypewriter = (text: string, callback?: () => void) => {
         let i = 0
@@ -121,12 +121,51 @@ const App = () => {
         }
     }
 
+    const formatChatAsText = (chat: { role: string, content: string }[]) =>
+        chat.map(c => `${c.role.toUpperCase()}: ${c.content}`).join('\n\n')
+
+    const formatChatAsMarkdown = (chat: { role: string, content: string }[]) =>
+        chat.map(c => `### ${c.role === 'user' ? 'You' : 'Assistant'}\n\n${c.content}`).join('\n\n')
+
+    const formatChatAsJSON = (chat: { role: string, content: string }[]) =>
+        JSON.stringify(chat, null, 4)
+
+    const downloadFile = (filename: string, content: string, type: string) => {
+        const blob = new Blob([content], { type })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = filename
+        link.click()
+        URL.revokeObjectURL(link.href)
+    }
+
+    const handleDownload = (sessionId: string, format: string) => {
+        const saved = localStorage.getItem(sessionId)
+        if (!saved) {
+            return
+        }
+        const parsed = JSON.parse(saved)
+        const timestamp = sessionId.replace('olaf-session-', '')
+        const filenameBase = `olaf-session-${timestamp}`
+        if (format === 'txt') {
+            downloadFile(`${filenameBase}.txt`, formatChatAsText(parsed), 'text/plain')
+        }
+        else if (format === 'md') {
+            downloadFile(`${filenameBase}.md`, formatChatAsMarkdown(parsed), 'text/markdown')
+        }
+        else if (format === 'json') {
+            downloadFile(`${filenameBase}.json`, formatChatAsJSON(parsed), 'application/json')
+        }
+        setActiveDownloadTooltip(null)
+    }
+
     const handleUsername = () => {
         const input = window.prompt("Enter Username (Leave empty to remove)")
         if (input && input.trim() !== '') {
             setUsername(input.trim())
             localStorage.setItem('olaf-username', input.trim())
-        } else {
+        }
+        else {
             setUsername('Anonymous')
             localStorage.removeItem('olaf-username')
         }
@@ -176,13 +215,13 @@ const App = () => {
     }
 
     const resetUserAvatar = () => {
-        localStorage.removeItem('olaf-user-avatar');
-        setUserAvatar(null);
+        localStorage.removeItem('olaf-user-avatar')
+        setUserAvatar(null)
     }
 
     const resetBotAvatar = () => {
-        localStorage.removeItem('olaf-bot-avatar');
-        setBotAvatar(null);
+        localStorage.removeItem('olaf-bot-avatar')
+        setBotAvatar(null)
     }
 
     useEffect(() => {
@@ -241,7 +280,7 @@ const App = () => {
     return (
         <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
-            <div className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-gray-900 text-white transition-all duration-300 flex flex-col`}>
+            <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-gray-900 text-white transition-all duration-300 flex flex-col`}>
                 <div className="p-4 font-bold text-lg border-b border-gray-700 flex justify-between items-center">Olaf
                     <button onClick={() => setSidebarOpen(false)} className="text-sm bg-gray-700 px-2 py-1 hover:bg-gray-600">
                         Hide
@@ -251,9 +290,22 @@ const App = () => {
                     <div>
                         <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-pink-700 text-white font-semibold px-4 py-2 mb-2">New Chat</button>
                         <h2 className="text-lg font-semibold">History</h2>
-                        <ul className="mt-2">
+                        <ul className="mt-2 relative">
                             {chatSessions.map(session => (
-                                <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded text-xs" onClick={() => loadChatSession(session.id)}>{session.title}<button onClick={() => deleteSession(session.id)} className="ml-2 text-red-500 hover:bg-red-800 hover:cursor-pointer hover:text-white p-1">Delete</button></li>
+                                <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded text-sm" onClick={() => loadChatSession(session.id)}>{session.title}
+                                    <button className="ml-2 text-xs text-blue-500 hover:bg-blue-500 hover:cursor-pointer hover:text-white p-1" onClick={(e) => {
+                                        e.preventDefault()
+                                        setActiveDownloadTooltip(prev => prev === session.id ? null : session.id)
+                                    }}>Export</button>
+                                    <button onClick={() => deleteSession(session.id)} className="ml-2 text-xs text-red-500 hover:bg-red-800 hover:cursor-pointer hover:text-white p-1">Delete</button>
+                                    {activeDownloadTooltip === session.id && (
+                                        <div className="right-0 bottom-10 bg-gray-600 text-white text-sm rounded shadow mt-1 z-10">
+                                            <button onClick={() => handleDownload(session.id, 'txt')} className="block hover:bg-gray-500 w-full p-2">TXT</button>
+                                            <button onClick={() => handleDownload(session.id, 'md')} className="block hover:bg-gray-500 w-full p-2">Markdown</button>
+                                            <button onClick={() => handleDownload(session.id, 'json')} className="block hover:bg-gray-500 w-full p-2">JSON</button>
+                                        </div>
+                                    )}
+                                </li>
                             ))}
                         </ul>
                     </div>
