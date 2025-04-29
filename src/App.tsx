@@ -132,9 +132,22 @@ const App = () => {
         }
     }
 
+    const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif']
+
+    const validateFile = (file: File) => {
+        if (acceptedImageTypes.includes(file.type)) {
+            return true
+        }
+        return false
+    }
+
     const handleBotAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0]
+            if (!validateFile(file)) {
+                alert("Invalid file type (use jpeg/png/gif/webp/avif)")
+                return
+            }
             const reader = new FileReader()
             reader.onloadend = () => {
                 const base64string = reader.result as string
@@ -148,6 +161,10 @@ const App = () => {
     const handleUserAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0]
+            if (!validateFile(file)) {
+                alert("Invalid file type (use jpeg/png/gif/webp/avif)")
+                return
+            }
             const reader = new FileReader()
             reader.onloadend = () => {
                 const base64string = reader.result as string
