@@ -179,11 +179,11 @@ const App = () => {
         localStorage.removeItem('olaf-user-avatar');
         setUserAvatar(null);
     }
-    
+
     const resetBotAvatar = () => {
         localStorage.removeItem('olaf-bot-avatar');
         setBotAvatar(null);
-    }    
+    }
 
     useEffect(() => {
         const fetchModels = async () => {
