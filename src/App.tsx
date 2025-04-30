@@ -300,9 +300,9 @@ const App = () => {
                                     <button onClick={() => deleteSession(session.id)} className="ml-2 text-xs text-red-500 hover:bg-red-800 hover:cursor-pointer hover:text-white p-1">Delete</button>
                                     {activeDownloadTooltip === session.id && (
                                         <div className="right-0 bottom-10 bg-gray-600 text-white text-sm rounded shadow mt-1 z-10">
-                                            <button onClick={() => handleDownload(session.id, 'txt')} className="block hover:bg-gray-500 w-full p-2">TXT</button>
-                                            <button onClick={() => handleDownload(session.id, 'md')} className="block hover:bg-gray-500 w-full p-2">Markdown</button>
-                                            <button onClick={() => handleDownload(session.id, 'json')} className="block hover:bg-gray-500 w-full p-2">JSON</button>
+                                            <button onClick={() => handleDownload(session.id, 'txt')} className="btn-tooltip">TXT</button>
+                                            <button onClick={() => handleDownload(session.id, 'md')} className="btn-tooltip">Markdown</button>
+                                            <button onClick={() => handleDownload(session.id, 'json')} className="btn-tooltip">JSON</button>
                                         </div>
                                     )}
                                 </li>
@@ -313,14 +313,14 @@ const App = () => {
                         <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 mt-4 flex justify-between items-center">Settings {settingsExpanded ? "▼" : "▲"}</button>
                         <div className={`overflow-hidden transition-all duration-500 ease-in-out ${settingsExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
                             <div className="flex flex-col gap-2 mt-4">
-                                <button onClick={handleUsername} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">Set Username</button>
-                                <button onClick={() => setShowUsername(prev => !prev)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">{showUsername ? "Hide Username" : "Show Username"}</button>
-                                <label className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded text-center cursor-pointer">Upload User Avatar<input type="file" accept="image/*" onChange={handleUserAvatarUpload} className="hidden" /></label>
-                                <label className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded text-center cursor-pointer">Upload Bot Avatar<input type="file" accept="image/*" onChange={handleBotAvatarUpload} className="hidden" /></label>
-                                <button onClick={() => setShowAvatars(prev => !prev)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">{showAvatars ? "Hide Avatars" : "Show Avatars"}</button>
-                                <button onClick={resetUserAvatar} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">Reset User Avatar</button>
-                                <button onClick={resetBotAvatar} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded">Reset Bot Avatar</button>
-                                <button onClick={deleteAllSessions} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded">Delete All Sessions</button>
+                                <button onClick={handleUsername} className="btn-settings">Set Username</button>
+                                <button onClick={() => setShowUsername(prev => !prev)} className="btn-settings">{showUsername ? "Hide Username" : "Show Username"}</button>
+                                <label className="btn-upload">Upload User Avatar<input type="file" accept="image/*" onChange={handleUserAvatarUpload} className="hidden" /></label>
+                                <label className="btn-upload">Upload Bot Avatar<input type="file" accept="image/*" onChange={handleBotAvatarUpload} className="hidden" /></label>
+                                <button onClick={() => setShowAvatars(prev => !prev)} className="btn-settings">{showAvatars ? "Hide Avatars" : "Show Avatars"}</button>
+                                <button onClick={resetUserAvatar} className="btn-settings">Reset User Avatar</button>
+                                <button onClick={resetBotAvatar} className="btn-settings">Reset Bot Avatar</button>
+                                <button onClick={deleteAllSessions} className="btn-danger">Delete All Sessions</button>
                             </div>
                         </div>
                     </div>
