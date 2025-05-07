@@ -20,6 +20,15 @@ const App = () => {
     const [showAvatars, setShowAvatars] = useState(true)
     const [settingsExpanded, setSettingsExpanded] = useState(false)
     const [activeDownloadTooltip, setActiveDownloadTooltip] = useState<string | null>(null)
+    const [theme, setTheme] = useState<string>(() => localStorage.getItem('olaf-theme') || 'base')
+
+    useEffect(() => {
+        document.documentElement.classList.remove('theme-pink', 'theme-orange', 'theme-sky')
+        if (theme !== 'base') {
+            document.documentElement.classList.add(`theme-${theme}`)
+        }
+        localStorage.setItem('olaf-theme', theme)
+    }, [theme])
 
     const displayTypewriter = (text: string, callback?: () => void) => {
         let i = 0
@@ -280,7 +289,7 @@ const App = () => {
     return (
         <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
-            <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-gray-900 text-white transition-all duration-300 flex flex-col`}>
+            <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-secondary text-white transition-all duration-300 flex flex-col`}>
                 <div className="p-4 font-bold text-lg border-b border-gray-700 flex justify-between items-center">Olaf
                     <button onClick={() => setSidebarOpen(false)} className="text-sm bg-gray-700 px-2 py-1 hover:bg-gray-600">
                         Hide
@@ -288,7 +297,7 @@ const App = () => {
                 </div>
                 <div className="p-4 h-[100%] flex flex-col content-between justify-between items-stretch">
                     <div>
-                        <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-pink-700 text-white font-semibold px-4 py-2 mb-2">New Chat</button>
+                        <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-accent text-white font-semibold px-4 py-2 mb-2">New Chat</button>
                         <h2 className="text-lg font-semibold">History</h2>
                         <ul className="mt-2 relative">
                             {chatSessions.map(session => (
@@ -313,6 +322,19 @@ const App = () => {
                         <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 mt-4 flex justify-between items-center">Settings {settingsExpanded ? "▼" : "▲"}</button>
                         <div className={`overflow-hidden transition-all duration-500 ease-in-out ${settingsExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
                             <div className="flex flex-col gap-2 mt-4">
+                                <label className="btn-settings">
+                                    Theme:
+                                    <select
+                                        className="ml-2 border rounded px-2 py-1 bg-gray-100 text-gray-900"
+                                        value={theme}
+                                        onChange={e => setTheme(e.target.value)}
+                                    >
+                                        <option value="base">Default</option>
+                                        <option value="pink">Pink</option>
+                                        <option value="orange">Orange</option>
+                                        <option value="sky">Sky Blue</option>
+                                    </select>
+                                </label>
                                 <button onClick={handleUsername} className="btn-settings">Set Username</button>
                                 <button onClick={() => setShowUsername(prev => !prev)} className="btn-settings">{showUsername ? "Hide Username" : "Show Username"}</button>
                                 <label className="btn-upload">Upload User Avatar<input type="file" accept="image/*" onChange={handleUserAvatarUpload} className="hidden" /></label>
@@ -345,7 +367,7 @@ const App = () => {
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
                             {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 border-black border rounded-4xl" />)}
 
-                            <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-gray-500 text-white' : 'bg-gray-300 text-black'}`}>
+                            <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black'}`}>
                                 {msg.content}
                             </div>
 
@@ -380,7 +402,7 @@ const App = () => {
                             )}
                         </select>
                         <textarea className="border rounded px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)} />
-                        <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-pink-700 text-white font-semibold px-6 rounded transition">Send</button>
+                        <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-accent text-white font-semibold px-6 rounded transition">Send</button>
                     </div>
                 </div>
             </div>
