@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, ChangeEvent } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import { Model, ApiResponse } from './Interfaces'
 import './App.css'
 
