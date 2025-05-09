@@ -291,17 +291,17 @@ const App = () => {
             {/* Sidebar */}
             <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-secondary text-white transition-all duration-300 flex flex-col`}>
                 <div className="p-4 font-bold text-lg border-b border-gray-700 flex justify-between items-center">Olaf
-                    <button onClick={() => setSidebarOpen(false)} className="text-sm bg-gray-700 px-2 py-1 hover:bg-gray-600">
+                    <button onClick={() => setSidebarOpen(false)} className="text-sm bg-gray-700 px-2 py-1 hover:bg-hover">
                         Hide
                     </button>
                 </div>
                 <div className="p-4 h-[100%] flex flex-col content-between justify-between items-stretch">
                     <div>
-                        <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-accent text-white font-semibold px-4 py-2 mb-2">New Chat</button>
+                        <button onClick={createNewChat} className="w-full bg-gray-600 hover:bg-hover text-white font-semibold px-4 py-2 mb-2">New Chat</button>
                         <h2 className="text-lg font-semibold">History</h2>
                         <ul className="mt-2 relative">
                             {chatSessions.map(session => (
-                                <li key={session.id} className="cursor-pointer hover:bg-gray-700 p-2 rounded text-sm" onClick={() => loadChatSession(session.id)}>{session.title}
+                                <li key={session.id} className="cursor-pointer hover:bg-hover p-2 rounded text-sm" onClick={() => loadChatSession(session.id)}>{session.title}
                                     <button className="ml-2 text-xs text-blue-500 hover:bg-blue-500 hover:cursor-pointer hover:text-white p-1" onClick={(e) => {
                                         e.preventDefault()
                                         setActiveDownloadTooltip(prev => prev === session.id ? null : session.id)
@@ -319,7 +319,7 @@ const App = () => {
                         </ul>
                     </div>
                     <div id="settings" className="flex flex-col">
-                        <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 mt-4 flex justify-between items-center">Settings {settingsExpanded ? "▼" : "▲"}</button>
+                        <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full bg-gray-700 hover:bg-hover text-white font-semibold px-4 py-2 mt-4 flex justify-between items-center">Settings {settingsExpanded ? "▼" : "▲"}</button>
                         <div className={`overflow-hidden transition-all duration-500 ease-in-out ${settingsExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
                             <div className="flex flex-col gap-2 mt-4">
                                 <label className="btn-settings">
@@ -356,7 +356,7 @@ const App = () => {
                         <h2 className="text-2xl font-light">Hello, {username ? username : 'Anonymous'}</h2>
                     )}
                     {!sidebarOpen && (
-                        <button onClick={() => setSidebarOpen(true)} className="text-sm bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">
+                        <button onClick={() => setSidebarOpen(true)} className="text-sm bg-gray-300 px-3 py-1 rounded hover:bg-secondary hover:text-text">
                             Open Menu
                         </button>
                     )}
