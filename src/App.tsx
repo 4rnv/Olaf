@@ -330,9 +330,9 @@ const App = () => {
                                         onChange={e => setTheme(e.target.value)}
                                     >
                                         <option value="base">Default</option>
-                                        <option value="pink">Pink</option>
-                                        <option value="orange">Orange</option>
-                                        <option value="sky">Sky Blue</option>
+                                        <option value="pink">Makinami</option>
+                                        <option value="orange">Shikinami</option>
+                                        <option value="sky">Ayanami</option>
                                     </select>
                                 </label>
                                 <button onClick={handleUsername} className="btn-settings">Set Username</button>

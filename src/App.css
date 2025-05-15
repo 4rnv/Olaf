@@ -20,7 +20,7 @@
     --color-primary: #4a5568;
     --color-secondary: #101828;
     --color-accent: #b83280;
-    --color-bg: #101828;
+    --color-bg: #eeeeff;
     --color-text: #eeeeee;
     --color-hover: #718096;
 }
@@ -29,30 +29,30 @@
 @layer base {
 
     .theme-pink {
-        --color-primary: #ec4899;
-        --color-secondary: #f472b6;
-        --color-accent: #ef46b9;
+        --color-primary: #ff80bf;
+        --color-secondary: #ffadd8;
+        --color-accent: #eb41b5;
         --color-bg: #fdf2f8;
-        --color-text: #111827;
-        --color-hover: #972480;
+        --color-text: #360027;
+        --color-hover: #d7447f;
     }
 
     .theme-orange {
-        --color-primary: #f97316;
-        --color-secondary: #fdba74;
-        --color-accent: #f59e0b;
-        --color-bg: #fff7ed;
-        --color-text: #78350f;
-        --color-hover: #bf5c1a;
+        --color-primary: #db7c45;
+        --color-secondary: #e4ab7f;
+        --color-accent: #fe8122;
+        --color-bg: #ffffee; /*not even using this anywhere?*/
+        --color-text: #400000;
+        --color-hover: #e36433;
     }
 
     .theme-sky {
-        --color-primary: #0ea5e9;
-        --color-secondary: #7dd3fc;
-        --color-accent: #38bdf8;
+        --color-primary: #58b4de;
+        --color-secondary: #8ccae7;
+        --color-accent: #11a4e3;
         --color-bg: #f0f9ff;
-        --color-text: #0c4a6e;
-        --color-hover: #4884de;
+        --color-text: #002040;
+        --color-hover: #278bc1;
     }
 }
 
