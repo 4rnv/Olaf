@@ -21,6 +21,8 @@ const App = () => {
     const [settingsExpanded, setSettingsExpanded] = useState(false)
     const [activeDownloadTooltip, setActiveDownloadTooltip] = useState<string | null>(null)
     const [theme, setTheme] = useState<string>(() => localStorage.getItem('olaf-theme') || 'base')
+    const [quoteText, setQuoteText] = useState<string | null>(null)
+    const [quotePos, setQuotePos] = useState<{ x: number, y: number } | null>(null)
 
     useEffect(() => {
         document.documentElement.classList.remove('theme-pink', 'theme-orange', 'theme-sky')
@@ -98,6 +100,7 @@ const App = () => {
         setStats('')
         setChatHistory([])
         setCurrentPrompt('')
+        setQuoteText(null)
         localStorage.setItem(newChatId, JSON.stringify([]))
     }
 
@@ -112,6 +115,7 @@ const App = () => {
         }
         setActiveChatId(chatId)
         setStats('')
+        setQuoteText(null)
     }
 
     const deleteSession = (chatId: string) => {
@@ -286,6 +290,31 @@ const App = () => {
         fetchModels()
     }, [])
 
+    useEffect(() => {
+        const handleSelection = (e: MouseEvent) => {
+            const selection = window.getSelection()
+            if (selection && selection.rangeCount > 0) {
+                const text = selection.toString().trim()
+                const range = selection.getRangeAt(0)
+                const parent = range.commonAncestorContainer.parentElement
+                if (text && parent?.classList.contains('bot-message')) {
+                    const rect = range.getBoundingClientRect()
+                    setQuoteText(text)
+                    setQuotePos({ x: rect.left + window.scrollX, y: rect.top + window.scrollY - 20 })
+                }
+                else {
+                    setQuoteText(null)
+                }
+            }
+            else {
+                setQuoteText(null)
+            }
+        }
+
+        document.addEventListener('mouseup', handleSelection)
+        return () => document.removeEventListener('mouseup', handleSelection)
+    }, [])
+
     return (
         <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
@@ -301,7 +330,7 @@ const App = () => {
                         <h2 className="text-lg font-semibold">History</h2>
                         <ul className="mt-2">
                             {chatSessions.map(session => (
-                                <li key={session.id} className="cursor-pointer hover:bg-hover p-2 rounded text-sm" onClick={() => loadChatSession(session.id)}>{session.title}
+                                <li key={session.id} className={`cursor-pointer hover:bg-hover p-2 rounded text-sm ${activeChatId === session.id ? 'font-bold' : ''}`} onClick={() => loadChatSession(session.id)}>{session.title}
                                     <button className="ml-2 text-xs text-blue-500 hover:bg-blue-500 hover:cursor-pointer hover:text-white p-1" onClick={(e) => {
                                         e.preventDefault()
                                         setActiveDownloadTooltip(prev => prev === session.id ? null : session.id)
@@ -367,7 +396,7 @@ const App = () => {
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
                             {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 border-black border rounded-4xl" />)}
 
-                            <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black'}`}>
+                            <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
                                 {msg.content}
                             </div>
 
@@ -383,6 +412,14 @@ const App = () => {
                         </div>
                     )}
                 </div>
+                {quoteText && quotePos && (
+                    <div style={{ top: quotePos.y, left: quotePos.x }} className="font-serif absolute z-50 bg-accent text-white px-2 py-1 hover:bg-hover text-sm shadow">
+                        <button onClick={() => {
+                            setCurrentPrompt(prev => `> ${quoteText}\n\n${prev}`)
+                            setQuoteText(null)
+                        }}>“Quote</button>
+                    </div>
+                )}
                 <div className="text-gray-500 text-xs mt-1">{stats}</div>
 
                 {/* Footer */}
@@ -401,7 +438,13 @@ const App = () => {
                                 ))
                             )}
                         </select>
-                        <textarea className="border rounded px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)} />
+                        <textarea required className="border rounded px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    handleSendRequest()
+                                }
+                            }} />
                         <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-accent text-white font-semibold px-6 rounded transition">Send</button>
                     </div>
                 </div>
