@@ -1,4 +1,5 @@
 import { useState, useEffect, ChangeEvent } from 'react'
+import { Trash2, FileDown, } from "lucide-react"
 import { Model, ApiResponse } from './Interfaces'
 import './App.css'
 
@@ -330,14 +331,22 @@ const App = () => {
                         <h2 className="text-lg font-semibold">History</h2>
                         <ul className="mt-2">
                             {chatSessions.map(session => (
-                                <li key={session.id} className={`cursor-pointer hover:bg-hover p-2 rounded text-sm ${activeChatId === session.id ? 'font-bold' : ''}`} onClick={() => loadChatSession(session.id)}>{session.title}
-                                    <button className="ml-2 text-xs text-blue-500 hover:bg-blue-500 hover:cursor-pointer hover:text-white p-1" onClick={(e) => {
-                                        e.preventDefault()
-                                        setActiveDownloadTooltip(prev => prev === session.id ? null : session.id)
-                                    }}>Export</button>
-                                    <button onClick={() => deleteSession(session.id)} className="ml-2 text-xs text-red-500 hover:bg-red-800 hover:cursor-pointer hover:text-white p-1">Delete</button>
+                                <li key={session.id} className={`cursor-pointer hover:bg-hover p-2 text-sm ${activeChatId === session.id ? 'font-bold' : ''}`} onClick={() => loadChatSession(session.id)}>
+                                    <div className="flex justify-between items-center gap-2">
+                                        <span className="flex-1 truncate cursor-pointer" onClick={() => loadChatSession(session.id)}>
+                                            {session.title}
+                                        </span>
+                                        <div className="flex gap-2 items-center">
+
+                                            <button className=" text-xs text-gray-300 hover:bg-blue-500 hover:cursor-pointer p-1" onClick={(e) => {
+                                                e.preventDefault()
+                                                setActiveDownloadTooltip(prev => prev === session.id ? null : session.id)
+                                            }} title='Export Chat'><FileDown size={20} /></button>
+                                            <button onClick={() => deleteSession(session.id)} className="text-xs text-gray-300 hover:cursor-pointer hover:bg-red-500 p-1" title='Delete'><Trash2 size={20} /></button>
+                                        </div>
+                                    </div>
                                     {activeDownloadTooltip === session.id && (
-                                        <div className="right-0 bottom-10 bg-gray-600 text-white text-sm rounded shadow mt-1 z-10">
+                                        <div className="right-0 bottom-10 bg-gray-600 text-white text-sm shadow mt-1 z-10">
                                             <button onClick={() => handleDownload(session.id, 'txt')} className="btn-tooltip">TXT</button>
                                             <button onClick={() => handleDownload(session.id, 'md')} className="btn-tooltip">Markdown</button>
                                             <button onClick={() => handleDownload(session.id, 'json')} className="btn-tooltip">JSON</button>
@@ -354,7 +363,7 @@ const App = () => {
                                 <label className="btn-settings">
                                     Theme:
                                     <select
-                                        className="ml-2 border rounded px-2 py-1 bg-gray-100 text-gray-900"
+                                        className="ml-2 border px-2 py-1 bg-gray-100 text-gray-900"
                                         value={theme}
                                         onChange={e => setTheme(e.target.value)}
                                     >
@@ -385,7 +394,7 @@ const App = () => {
                         <h2 className="text-2xl font-light">Hello, {username ? username : 'Anonymous'}</h2>
                     )}
                     {!sidebarOpen && (
-                        <button onClick={() => setSidebarOpen(true)} className="text-sm bg-gray-300 px-3 py-1 rounded hover:bg-secondary hover:text-text">
+                        <button onClick={() => setSidebarOpen(true)} className="text-sm bg-gray-300 px-3 py-1 hover:bg-secondary hover:text-text">
                             Open Menu
                         </button>
                     )}
@@ -394,9 +403,9 @@ const App = () => {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
-                            {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 border-black border rounded-4xl" />)}
+                            {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 border-black border rounded-full" />)}
 
-                            <div className={`max-w-[60%] px-4 py-2 rounded-lg shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
+                            <div className={`max-w-[60%] px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
                                 {msg.content}
                             </div>
 
@@ -406,7 +415,7 @@ const App = () => {
 
                     {typingText && (
                         <div className="flex justify-start">
-                            <div className="max-w-[60%] px-4 py-2 rounded-lg shadow bg-gray-300 text-black">
+                            <div className="max-w-[60%] px-4 py-2 shadow bg-gray-300 text-black">
                                 {typingText}
                             </div>
                         </div>
@@ -425,7 +434,7 @@ const App = () => {
                 {/* Footer */}
                 <div className="border-t p-2 bg-white flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <select className="border rounded px-3 h-12 bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentModel} onChange={(e) => {
+                        <select className="border px-3 h-12 bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentModel} onChange={(e) => {
                             const selectedModel = e.target.value
                             setCurrentModel(selectedModel)
                             localStorage.setItem('selectedModel', selectedModel)
@@ -438,14 +447,14 @@ const App = () => {
                                 ))
                             )}
                         </select>
-                        <textarea required className="border rounded px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}
+                        <textarea required className="border px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault()
                                     handleSendRequest()
                                 }
                             }} />
-                        <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-accent text-white font-semibold px-6 rounded transition">Send</button>
+                        <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-accent text-white font-semibold px-6 transition">Send</button>
                     </div>
                 </div>
             </div>
