@@ -1,21 +1,5 @@
 @import "tailwindcss";
 
-/* @utility btn-settings {
-    @apply w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 text-center;
-}
-
-@utility btn-danger {
-    @apply w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2;
-}
-
-@utility btn-upload {
-    @apply btn-settings cursor-pointer;
-}
-
-@utility btn-tooltip {
-    @apply block hover:bg-gray-500 w-full p-2;
-} */
-
 @theme {
     --color-primary: #4a5568;
     --color-secondary: #101828;
@@ -32,7 +16,7 @@
         --color-primary: #ff80bf;
         --color-secondary: #ffadd8;
         --color-accent: #eb41b5;
-        --color-bg: #fdf2f8;
+        --color-bg: #d15398;
         --color-text: #360027;
         --color-hover: #d7447f;
     }
@@ -50,7 +34,7 @@
         --color-primary: #58b4de;
         --color-secondary: #8ccae7;
         --color-accent: #11a4e3;
-        --color-bg: #f0f9ff;
+        --color-bg: #58b4de;
         --color-text: #002040;
         --color-hover: #278bc1;
     }
@@ -69,5 +53,5 @@
 }
 
 @utility btn-tooltip {
-    @apply block hover:bg-secondary w-full p-2;
+    @apply block bg-primary hover:bg-secondary w-full p-2;
 }
