@@ -41,7 +41,7 @@
 }
 
 @utility btn-settings {
-    @apply w-full bg-primary hover:bg-hover text-text font-semibold px-4 py-2 text-center;
+    @apply w-full bg-primary hover:bg-hover text-text font-semibold px-2 py-2 text-center;
 }
 
 @utility btn-danger {

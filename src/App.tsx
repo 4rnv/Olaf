@@ -1,5 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import { Trash2, FileDown, } from "lucide-react"
+import { UserX, BotIcon, EyeOff, Eye, BotOff, UserPlus } from "lucide-react"
 import { Model, ApiResponse } from './Interfaces'
 import './App.css'
 
@@ -320,7 +321,7 @@ const App = () => {
         <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
             <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-secondary text-white transition-all duration-300 flex flex-col`}>
-                <div className="p-4 font-bold text-lg border-b border-gray-700 flex justify-between items-center">Olaf
+                <div className="p-4 font-bold text-lg flex justify-between items-center">Olaf
                     <button onClick={() => setSidebarOpen(false)} className="text-sm bg-primary px-2 py-1 hover:bg-hover">
                         Hide
                     </button>
@@ -356,30 +357,89 @@ const App = () => {
                             ))}
                         </ul>
                     </div>
-                    <div id="settings" className="flex flex-col">
-                        <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full bg-primary hover:bg-hover text-white font-semibold px-4 py-2 mt-4 flex justify-between items-center">Settings {settingsExpanded ? "▼" : "▲"}</button>
-                        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${settingsExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
-                            <div className="flex flex-col gap-2 mt-4">
-                                <label className="btn-settings">
-                                    Theme:
-                                    <select
-                                        className="ml-2 border px-2 py-1 bg-gray-100 text-gray-900"
-                                        value={theme}
-                                        onChange={e => setTheme(e.target.value)}
+                    <div id="settings" className="mt-4">
+                        <button onClick={() => setSettingsExpanded(!settingsExpanded)} className="w-full btn-settings flex justify-between">Settings {settingsExpanded ? "▼" : "▲"}</button>
+
+                        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${settingsExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
+                            {/* THEME SECTION */}
+                            <div className="pt-4">
+                                <h3 className="text-sm font-semibold mb-1">Theme</h3>
+                                <select value={theme} onChange={e => setTheme(e.target.value)} className="w-full px-3 py-2 bg-gray-100 text-black">
+                                    <option value="base">Default</option>
+                                    <option value="pink">Makinami</option>
+                                    <option value="orange">Shikinami</option>
+                                    <option value="sky">Ayanami</option>
+                                </select>
+                            </div>
+                            {/* USER SETTINGS */}
+                            <div className="pt-4">
+                                <h3 className="text-sm font-semibold mb-1">User</h3>
+                                <div className="flex gap-1">
+                                    <button onClick={handleUsername} className="btn-settings">Set Username</button>
+                                    <button onClick={() => setShowUsername(prev => !prev)} className="btn-settings">{showUsername ? "Hide" : "Show"} Username</button>
+                                </div>
+                            </div>
+
+                            {/* AVATAR SETTINGS */}
+                            <div className="pt-4">
+                                <h3 className="text-sm font-semibold mb-1">Avatars</h3>
+
+                                <div className="grid grid-cols-3 gap-1 mt-2 px-12 py-0">
+                                    {/* Upload User Avatar */}
+                                    <label
+                                        title="Upload User Avatar"
+                                        className="border-3 border-dashed border-cyan-500 cursor-pointer flex items-center justify-center bg-transparent hover:bg-hover aspect-square"
                                     >
-                                        <option value="base">Default</option>
-                                        <option value="pink">Makinami</option>
-                                        <option value="orange">Shikinami</option>
-                                        <option value="sky">Ayanami</option>
-                                    </select>
-                                </label>
-                                <button onClick={handleUsername} className="btn-settings">Set Username</button>
-                                <button onClick={() => setShowUsername(prev => !prev)} className="btn-settings">{showUsername ? "Hide Username" : "Show Username"}</button>
-                                <label className="btn-upload">Upload User Avatar<input type="file" accept="image/*" onChange={handleUserAvatarUpload} className="hidden" /></label>
-                                <label className="btn-upload">Upload Bot Avatar<input type="file" accept="image/*" onChange={handleBotAvatarUpload} className="hidden" /></label>
-                                <button onClick={() => setShowAvatars(prev => !prev)} className="btn-settings">{showAvatars ? "Hide Avatars" : "Show Avatars"}</button>
-                                <button onClick={resetUserAvatar} className="btn-settings">Reset User Avatar</button>
-                                <button onClick={resetBotAvatar} className="btn-settings">Reset Bot Avatar</button>
+                                        <UserPlus size={20} className="text-white" />
+                                        <input type="file" accept="image/*" onChange={handleUserAvatarUpload} className="hidden" />
+                                    </label>
+
+                                    {/* Reset User Avatar */}
+                                    <button
+                                        onClick={resetUserAvatar}
+                                        title="Reset User Avatar"
+                                        className="border-3 border-dashed border-cyan-500 flex items-center justify-center bg-transparent hover:bg-hover aspect-square"
+                                    >
+                                        <UserX size={20} className="text-white" />
+                                    </button>
+
+                                    {/* Upload Bot Avatar */}
+                                    <label
+                                        title="Upload Bot Avatar"
+                                        className="border-3 border-dashed border-lime-500 cursor-pointer flex items-center justify-center bg-transparent hover:bg-hover aspect-square"
+                                    >
+                                        <BotIcon size={20} className="text-white" />
+                                        <input type="file" accept="image/*" onChange={handleBotAvatarUpload} className="hidden" />
+                                    </label>
+
+                                    {/* Reset Bot Avatar */}
+                                    <button
+                                        onClick={resetBotAvatar}
+                                        title="Reset Bot Avatar"
+                                        className="border-3 border-dashed border-lime-500 flex items-center justify-center bg-transparent hover:bg-hover aspect-square"
+                                    >
+                                        <BotOff size={20} className="text-white" />
+                                    </button>
+
+                                    {/* Toggle Avatar Visibility */}
+                                    <button
+                                        onClick={() => setShowAvatars(prev => !prev)}
+                                        title={showAvatars ? "Hide Avatars" : "Show Avatars"}
+                                        className="border-3 border-dashed border-yellow-200 flex items-center justify-center bg-transparent hover:bg-hover aspect-square"
+                                    >
+                                        {showAvatars ? (
+                                            <EyeOff size={20} className="text-white" />
+
+                                        ) : (
+                                            <Eye size={20} className="text-white" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* DANGER ZONE */}
+                            <div className="mt-4">
+                                <h3 className="text-sm font-semibold text-red-400 mb-1">Danger Zone</h3>
                                 <button onClick={deleteAllSessions} className="btn-danger">Delete All Sessions</button>
                             </div>
                         </div>
@@ -389,7 +449,7 @@ const App = () => {
 
             {/* Chat Area */}
             <div className="flex-1 flex flex-col bg-gray-100">
-                <div className="flex items-center justify-between p-4 bg-white border-b">
+                <div className="flex items-center justify-between p-4 bg-white">
                     {showUsername && (
                         <h2 className="text-2xl font-light">Hello, {username ? username : 'Anonymous'}</h2>
                     )}
@@ -403,13 +463,13 @@ const App = () => {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
-                            {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 border-black border rounded-full" />)}
+                            {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 rounded-full" />)}
 
                             <div className={`max-w-[60%] px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
                                 {msg.content}
                             </div>
 
-                            {showAvatars && msg.role === 'user' && (<img src={userAvatar || "/user-avatar.png"} alt="(You)" className="w-16 h-16 border-black border rounded-full" />)}
+                            {showAvatars && msg.role === 'user' && (<img src={userAvatar || "/user-avatar.png"} alt="(You)" className="w-16 h-16 rounded-full" />)}
                         </div>
                     ))}
 
@@ -432,9 +492,9 @@ const App = () => {
                 <div className="text-gray-500 text-xs mt-1">{stats}</div>
 
                 {/* Footer */}
-                <div className="border-t p-2 bg-white flex flex-col gap-2">
+                <div className="p-2 bg-white flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <select className="border px-3 h-12 bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentModel} onChange={(e) => {
+                        <select className="px-3 h-12 bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentModel} onChange={(e) => {
                             const selectedModel = e.target.value
                             setCurrentModel(selectedModel)
                             localStorage.setItem('selectedModel', selectedModel)
@@ -447,7 +507,7 @@ const App = () => {
                                 ))
                             )}
                         </select>
-                        <textarea required className="border px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}
+                        <textarea required className="px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault()
