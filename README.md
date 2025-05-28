@@ -1,54 +1,34 @@
-# React + TypeScript + Vite
+# Olaf ❄️ | Ollama Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A local interface for interacting with Ollama through chat. Features include running multiple sessions, persistent history, chat export and theming. Built in React + TypeScript + Vite.
 
-Currently, two official plugins are available:
+<img src="./images/ss1.png" width=1000 style="margin-bottom:10px;">
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<img src="./images/ss2.png" width=1000 style="margin-bottom:10px;">
 
-## Expanding the ESLint configuration
+### Installation & Usage
+- Clone this repo.
+- `npm install`
+- Start Ollama. By default, this app expects the Ollama API at http://localhost:11434.
+- `npm run dev`
+- Application will be live at localhost:5173.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Features
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- Set a custom username.
+- Upload avatars for both the user and assistant (bot).
+- Each chat session is saved in localStorage.
+- Sessions can be:
+    - Deleted (individually or all at once).
+    - Exported in .txt, .md, or .json formats.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+<img src="./images/ss3.png" width=300 style="margin-bottom:10px;">
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Themes:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+<img src="./images/themes.png" width=300>
+
+### Future Work
+
+- Markdown rendering of replies
+- Ability to search the web for live information.
