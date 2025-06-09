@@ -1,4 +1,5 @@
 import { useState, useEffect, ChangeEvent } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { Trash2, FileDown, } from "lucide-react"
 import { UserX, BotIcon, EyeOff, Eye, BotOff, UserPlus } from "lucide-react"
 import { Model, ApiResponse } from './Interfaces'
@@ -466,7 +467,26 @@ const App = () => {
                             {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 rounded-full" />)}
 
                             <div className={`max-w-[60%] px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
-                                {msg.content}
+                                {/* {msg.content} */}
+                                {msg.role === 'user' ? msg.content :
+                                    <ReactMarkdown
+                                        components={{
+                                            code: ({ node, className, children, ...props }) => (
+                                                <pre className="bg-gray-200 wrap-break-word text-wrap text-sm font-mono overflow-x-auto my-2 p-2"><code {...props}>{children}</code></pre>
+                                            ),
+                                            h1: ({ children }) => <h1 className="text-xl font-medium mb-2">{children}</h1>,
+                                            h2: ({ children }) => <h2 className="text-lg font-medium mb-1">{children}</h2>,
+                                            p: ({ children }) => <p className="mb-2">{children}</p>,
+                                            blockquote: ({ children }) => (
+                                                <blockquote className="p-2 border-l-4 bg-gray-200 border-gray-400 italic text-gray-800 my-2">{children}</blockquote>
+                                            ),
+                                            ul: ({ children }) => <ul className="list-disc pl-6 mb-2">{children}</ul>,
+                                            ol: ({ children }) => <ol className="list-decimal pl-6 mb-2">{children}</ol>,
+                                        }}
+                                    >
+                                        {msg.content}
+                                    </ReactMarkdown>
+                                }
                             </div>
 
                             {showAvatars && msg.role === 'user' && (<img src={userAvatar || "/user-avatar.png"} alt="(You)" className="w-16 h-16 rounded-full" />)}

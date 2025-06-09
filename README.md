@@ -18,6 +18,7 @@ A local interface for interacting with Ollama through chat. Features include run
 - Set a custom username.
 - Upload avatars for both the user and assistant (bot).
 - Each chat session is saved in localStorage.
+- Markdown rendering of replies.
 - Sessions can be:
     - Deleted (individually or all at once).
     - Exported in .txt, .md, or .json formats.
@@ -30,5 +31,4 @@ Themes:
 
 ### Future Work
 
-- Markdown rendering of replies
 - Ability to search the web for live information.
