@@ -329,7 +329,7 @@ const App = () => {
                 </div>
                 <div className="p-4 h-[100%] flex flex-col content-between justify-between items-stretch">
                     <div>
-                        <button onClick={createNewChat} className="w-full bg-primary hover:bg-hover text-white font-semibold px-4 py-2 mb-2">New Chat</button>
+                        <button onClick={createNewChat} className="w-full bg-primary hover:bg-hover text-white font-semibold px-4 py-2 mb-2">+ New Chat</button>
                         <h2 className="text-lg font-semibold">History</h2>
                         <ul className="mt-2">
                             {chatSessions.map(session => (
