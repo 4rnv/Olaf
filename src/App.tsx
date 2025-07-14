@@ -506,8 +506,8 @@ const App = () => {
             <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-secondary text-white transition-all duration-300 flex flex-col`}>
                 <div className="p-4 font-bold text-lg flex justify-between items-center">
                     <span>Olaf</span>
-                    <MessageCirclePlus onClick={createNewChat} className="hover:text-hover"/>
-                    <SidebarClose onClick={() => setSidebarOpen(false)} className="hover:text-hover"/>
+                    <MessageCirclePlus onClick={createNewChat} className="hover:text-hover" />
+                    <SidebarClose onClick={() => setSidebarOpen(false)} className="hover:text-hover" />
                 </div>
                 <div className="p-4 pt-0 h-[100%] flex flex-col content-between justify-between items-stretch">
                     <div>
@@ -625,7 +625,7 @@ const App = () => {
             <div className="flex-1 flex flex-col bg-gray-100">
                 <div className="flex items-center justify-between p-4 bg-white">
                     {!sidebarOpen && (
-                        <SidebarOpen onClick={() => setSidebarOpen(true)} className="hover:text-hover"/>
+                        <SidebarOpen onClick={() => setSidebarOpen(true)} className="hover:text-hover" />
                     )}
                 </div>
 
