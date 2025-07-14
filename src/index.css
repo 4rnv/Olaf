@@ -3,6 +3,25 @@
   transition: all 0.1s;
 }
 
-img {
+.rounded-img {
   border-radius: 1000px !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #ffffff88;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #ffffffdd;
 }
