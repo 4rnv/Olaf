@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react'
-import ReactMarkdown from 'react-markdown'
+import Markdown from 'markdown-to-jsx'
 import { Trash2, FileDown, PenTool, ImagePlus, Earth, SidebarClose, MessageCirclePlus, SidebarOpen, } from "lucide-react"
 import { UserX, BotIcon, EyeOff, Eye, BotOff, UserPlus } from "lucide-react"
 import { Model, ApiResponse, ImageResponse, ImageGenOverlayProps } from './Interfaces'
 import './App.css'
 
-const ImageGenOverlay = ({ isOpen, onClose, onGenerate }: ImageGenOverlayProps) => {
+const ImageGenOverlay = ({ isOpen, onClose }: ImageGenOverlayProps) => {
     const [prompt, setPrompt] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
     const [generatedImage, setGeneratedImage] = useState<ImageResponse | null>(null)
@@ -135,6 +135,7 @@ const App = () => {
     const [theme, setTheme] = useState<string>(() => localStorage.getItem('olaf-theme') || 'base')
     const [quoteText, setQuoteText] = useState<string | null>(null)
     const [quotePos, setQuotePos] = useState<{ x: number, y: number } | null>(null)
+    const quoteRangeRef = useRef<Range | null>(null)
     const [webSearch, setWebSearch] = useState<boolean>(false)
     const [showImageGenOverlay, setShowImageGenOverlay] = useState(false)
     const [showToolsDropdown, setShowToolsDropdown] = useState(false)
@@ -478,20 +479,26 @@ const App = () => {
     useEffect(() => {
         const handleSelection = (e: MouseEvent) => {
             const selection = window.getSelection()
-            if (selection && selection.rangeCount > 0) {
-                const text = selection.toString().trim()
-                const range = selection.getRangeAt(0)
-                const parent = range.commonAncestorContainer.parentElement
-                if (text && parent?.classList.contains('bot-message')) {
-                    const rect = range.getBoundingClientRect()
-                    setQuoteText(text)
-                    setQuotePos({ x: rect.left + window.scrollX, y: rect.top + window.scrollY - 20 })
-                }
-                else {
-                    setQuoteText(null)
-                }
+            if (!selection || selection.rangeCount === 0) {
+                setQuoteText(null)
+                return
             }
-            else {
+            const text = selection.toString().trim()
+            const range = selection.getRangeAt(0)
+            quoteRangeRef.current = range.cloneRange()
+
+            if (text) {
+                const rect = range.getBoundingClientRect()
+                setQuoteText(text)
+                setQuotePos({ x: rect.left + window.scrollX, y: rect.top + window.scrollY - 20 })
+                setTimeout(() => {
+                    const sel = window.getSelection()
+                    if (quoteRangeRef.current) {
+                        sel?.removeAllRanges()
+                        sel?.addRange(quoteRangeRef.current)
+                    }
+                }, 0)
+            } else {
                 setQuoteText(null)
             }
         }
@@ -636,24 +643,48 @@ const App = () => {
 
                             <div className={`max-w-[60%] px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
                                 {/* {msg.content} */}
-                                {msg.role === 'user' ? msg.content :
-                                    <ReactMarkdown
-                                        components={{
-                                            code: ({ node, className, children, ...props }) => (
-                                                <pre className="bg-gray-200 wrap-break-word text-wrap text-sm font-mono overflow-x-auto my-2 p-2"><code {...props}>{children}</code></pre>
-                                            ),
-                                            h1: ({ children }) => <h1 className="text-xl font-medium mb-2">{children}</h1>,
-                                            h2: ({ children }) => <h2 className="text-lg font-medium mb-1">{children}</h2>,
-                                            p: ({ children }) => <p className="mb-2">{children}</p>,
-                                            blockquote: ({ children }) => (
-                                                <blockquote className="p-2 border-l-4 bg-gray-200 border-gray-400 italic text-gray-800 my-2">{children}</blockquote>
-                                            ),
-                                            ul: ({ children }) => <ul className="list-disc pl-6 mb-2">{children}</ul>,
-                                            ol: ({ children }) => <ol className="list-decimal pl-6 mb-2">{children}</ol>,
-                                        }}
+                                {msg.role === 'user' ? msg.content : (
+                                    <Markdown
+                                        options={
+                                            {
+                                                overrides: {
+                                                    code: {
+                                                        props: {
+                                                            className: 'bg-gray-200 text-accent px-1 py-0.5 font-mono text-sm',
+                                                        },
+                                                    },
+                                                    pre: {
+                                                        props: {
+                                                            className: 'bg-gray-200 text-gray-100 rounded p-3 my-2 overflow-x-auto  wrap-break-word text-wrap'
+                                                        },
+                                                    },
+                                                    blockquote: {
+                                                        props: {
+                                                            className: 'border-l-4 border-gray-400 bg-white-50 pl-4 py-2 my-3 italic',
+                                                        },
+                                                    },
+                                                    ul: {
+                                                        props: {
+                                                            className: 'list-disc list-inside pl-5 my-2',
+                                                        },
+                                                    },
+                                                    ol: {
+                                                        props: {
+                                                            className: 'list-decimal list-inside pl-5 my-2',
+                                                        },
+                                                    },
+                                                    li: {
+                                                        props: {
+                                                            className: 'mb-1',
+                                                        },
+                                                    },
+                                                },
+                                            }
+                                        }
                                     >
                                         {msg.content}
-                                    </ReactMarkdown>
+                                    </Markdown>
+                                )
                                 }
                             </div>
 
@@ -668,15 +699,26 @@ const App = () => {
                             </div>
                         </div>
                     )}
+                    {quoteText && quotePos && (
+                        <div
+                            className="font-serif absolute z-50 bg-accent text-white px-2 py-1 hover:bg-hover text-sm shadow cursor-pointer"
+                            style={{
+                                position: 'absolute',
+                                left: quotePos.x,
+                                top: quotePos.y,
+                            }}
+                            onMouseDown={e => e.stopPropagation()}
+                            onMouseUp={e => e.stopPropagation()}
+                            onClick={() => {
+                                setCurrentPrompt(prev => `> ${quoteText}\n${prev}`)
+                                setQuoteText(null)
+                                window.getSelection()?.removeAllRanges()
+                            }}
+                        >
+                            Ask {currentModel}
+                        </div>
+                    )}
                 </div>
-                {quoteText && quotePos && (
-                    <div style={{ top: quotePos.y, left: quotePos.x }} className="font-serif absolute z-50 bg-accent text-white px-2 py-1 hover:bg-hover text-sm shadow">
-                        <button onClick={() => {
-                            setCurrentPrompt(prev => `> ${quoteText}\n\n${prev}`)
-                            setQuoteText(null)
-                        }}>“Quote</button>
-                    </div>
-                )}
                 <div className="text-gray-500 text-xs mt-1">{stats}</div>
 
                 {/* Footer */}
@@ -711,7 +753,6 @@ const App = () => {
                 <ImageGenOverlay
                     isOpen={showImageGenOverlay}
                     onClose={() => setShowImageGenOverlay(false)}
-                    onGenerate={(prompt) => console.log('Generate:', prompt)}
                 />
             )}
 

@@ -15,6 +15,5 @@ export interface ImageResponse {
 
 export interface ImageGenOverlayProps {
   isOpen: boolean,
-  onClose: () => void,
-  onGenerate: (prompt: string) => void
+  onClose: () => void
 }
