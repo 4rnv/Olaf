@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import Markdown from 'markdown-to-jsx'
-import { Trash2, FileDown, PenTool, ImagePlus, Earth, SidebarClose, MessageCirclePlus, SidebarOpen, } from "lucide-react"
+import { Trash2, FileDown, PenTool, ImagePlus, Earth, SidebarClose, MessageCirclePlus, SidebarOpen, SendHorizonal, Layers } from "lucide-react"
 import { UserX, BotIcon, EyeOff, Eye, BotOff, UserPlus } from "lucide-react"
 import { Model, ApiResponse, ImageResponse, ImageGenOverlayProps } from './Interfaces'
 import './App.css'
@@ -139,6 +139,7 @@ const App = () => {
     const [webSearch, setWebSearch] = useState<boolean>(false)
     const [showImageGenOverlay, setShowImageGenOverlay] = useState(false)
     const [showToolsDropdown, setShowToolsDropdown] = useState(false)
+    const [showModelDropdown, setShowModelDropdown] = useState(false)
 
     useEffect(() => {
         document.documentElement.classList.remove('theme-pink', 'theme-orange', 'theme-sky')
@@ -629,14 +630,16 @@ const App = () => {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-gray-100">
-                <div className="flex items-center justify-between p-4 bg-white">
+            <div className="flex-1 flex flex-col bg-gray-100 justify-evenly">
+                
+                <div className="flex items-center justify-start p-4">
                     {!sidebarOpen && (
                         <SidebarOpen onClick={() => setSidebarOpen(true)} className="hover:text-hover" />
                     )}
+                    <span className="text-gray-500 text-sm mt-1">{stats}</span>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto py-4 px-12 space-y-4">
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
                             {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 rounded-img" />)}
@@ -701,7 +704,7 @@ const App = () => {
                     )}
                     {quoteText && quotePos && (
                         <div
-                            className="font-serif absolute z-50 bg-accent text-white px-2 py-1 hover:bg-hover text-sm shadow cursor-pointer"
+                            className="font-serif absolute z-50 bg-accent text-gray-200 px-2 py-1 hover:bg-hover text-md shadow cursor-pointer"
                             style={{
                                 position: 'absolute',
                                 left: quotePos.x,
@@ -719,33 +722,103 @@ const App = () => {
                         </div>
                     )}
                 </div>
-                <div className="text-gray-500 text-xs mt-1">{stats}</div>
 
                 {/* Footer */}
-                <div className="p-2 bg-white flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                        <select className="px-3 h-12 bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentModel} onChange={(e) => {
-                            const selectedModel = e.target.value
-                            setCurrentModel(selectedModel)
-                            localStorage.setItem('selectedModel', selectedModel)
-                        }} >
-                            {loading ? (
-                                <option>Loading models...</option>
-                            ) : (
-                                models.map((model) => (
-                                    <option key={model.model} value={model.model}>{model.name}</option>
-                                ))
-                            )}
-                        </select>
-                        <ToolsDropdown />
-                        <textarea required className="px-3 py-2 flex-1 h-12 resize-none bg-gray-100 text-gray-900 focus:outline-none focus:ring focus:border-blue-500" value={currentPrompt} placeholder="Type your message..." onChange={(e) => setCurrentPrompt(e.target.value)}
+                <div className="relative bottom-2 w-full z-50 px-12 max-h-[25vh]">
+                    <div className="bg-gray-200 shadow-md border border-gray-300 w-full flex flex-col items-center p-4 gap-4">
+                        {/* Textarea */}
+                        <textarea
+                            required
+                            className="w-full h-24 px-4 py-3 bg-gray-200 text-black resize-none focus:outline-none focus:ring-2 focus:border-accent"
+                            placeholder="Type your message..."
+                            value={currentPrompt}
+                            onChange={(e) => setCurrentPrompt(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault()
                                     handleSendRequest()
                                 }
-                            }} />
-                        <button onClick={handleSendRequest} className="h-12 bg-gray-600 hover:bg-accent text-white font-semibold px-6 transition">Send</button>
+                            }}
+                        />
+                        <div className="w-full flex justify-between items-center">
+                            <div className="flex flex-row gap-1">
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowModelDropdown(!showModelDropdown)}
+                                    className="text-gray-700 hover:text-accent cursor-pointer focus:outline-none"
+                                >
+                                    <Layers size={24} />
+                                </button>
+                                {showModelDropdown && (
+                                    <div className="absolute bottom-full mb-2 left-0 w-40 bg-white border border-gray-300 shadow-lg text-sm z-10">
+                                        {loading ? (
+                                            <div className="p-2 text-gray-500">Loading models...</div>
+                                        ) : (
+                                            models.map((model) => (
+                                                <button
+                                                    key={model.model}
+                                                    className={`w-full px-4 py-2 text-left hover:bg-secondary ${currentModel === model.model ? 'bg-primary font-semibold' : ''
+                                                        }`}
+                                                    onClick={() => {
+                                                        setCurrentModel(model.model)
+                                                        localStorage.setItem('selectedModel', model.model)
+                                                        setShowModelDropdown(false)
+                                                    }}
+                                                >
+                                                    {model.name}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <div>{currentModel}</div>
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowToolsDropdown(!showToolsDropdown)}
+                                    className="text-gray-700 hover:text-accent focus:outline-none"
+                                >
+                                    <PenTool size={24} />
+                                </button>
+                                {showToolsDropdown && (
+                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-white border border-gray-300 shadow-lg z-10">
+                                        <button
+                                            onClick={() => {
+                                                setShowImageGenOverlay(true)
+                                                setShowToolsDropdown(false)
+                                            }}
+                                            className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-secondary"
+                                        >
+                                            <ImagePlus size={18} />
+                                            <span>Image Generation</span>
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setWebSearch(!webSearch)
+                                                setShowToolsDropdown(false)
+                                            }}
+                                            className={`w-full px-4 py-2 text-left flex items-center gap-2 ${webSearch ? 'bg-gray-100' : 'hover:bg-secondary'
+                                                }`}
+                                        >
+                                            <Earth size={18} />
+                                            <span>Web Search</span>
+                                            {webSearch && (
+                                                <span className="ml-auto text-xs bg-green-800 text-white px-2 py-0.5">ON</span>
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            </div>
+
+                            {/* Right: Send Button */}
+                            <button
+                                onClick={handleSendRequest}
+                                className="text-gray-700 hover:text-accent focus:outline-none"
+                            >
+                                <SendHorizonal size={24} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
