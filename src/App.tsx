@@ -150,14 +150,17 @@ const App = () => {
     }, [theme])
 
     const displayTypewriter = (text: string, callback?: () => void) => {
-        let i = 0
-        const speed = 1
+        const totalChunks = 10
+        const timeout = 100
+        const chunkSize = Math.ceil(text.length / totalChunks)
+        let currentChunk = 1
         setTypingText('')
         const typeWriter = () => {
-            if (i <= text.length) {
-                setTypingText(text.substring(0, i))
-                i++
-                setTimeout(typeWriter, speed)
+            if (currentChunk <= totalChunks) {
+                const endIndex = Math.min(currentChunk * chunkSize, text.length)
+                setTypingText(text.substring(0, endIndex))
+                currentChunk++
+                setTimeout(typeWriter, timeout)
             } else {
                 if (callback) callback()
             }
@@ -631,12 +634,11 @@ const App = () => {
 
             {/* Chat Area */}
             <div className="flex-1 flex flex-col bg-gray-100 justify-evenly">
-                
-                <div className="flex items-center justify-start p-4">
+                <div className="flex items-center justify-start p-4 gap-1">
                     {!sidebarOpen && (
                         <SidebarOpen onClick={() => setSidebarOpen(true)} className="hover:text-hover" />
                     )}
-                    <span className="text-gray-500 text-sm mt-1">{stats}</span>
+                    <div className="text-gray-500 text-sm mt-1">{stats}</div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto py-4 px-12 space-y-4">
@@ -742,73 +744,73 @@ const App = () => {
                         />
                         <div className="w-full flex justify-between items-center">
                             <div className="flex flex-row gap-1">
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowModelDropdown(!showModelDropdown)}
-                                    className="text-gray-700 hover:text-accent cursor-pointer focus:outline-none"
-                                >
-                                    <Layers size={24} />
-                                </button>
-                                {showModelDropdown && (
-                                    <div className="absolute bottom-full mb-2 left-0 w-40 bg-white border border-gray-300 shadow-lg text-sm z-10">
-                                        {loading ? (
-                                            <div className="p-2 text-gray-500">Loading models...</div>
-                                        ) : (
-                                            models.map((model) => (
-                                                <button
-                                                    key={model.model}
-                                                    className={`w-full px-4 py-2 text-left hover:bg-secondary ${currentModel === model.model ? 'bg-primary font-semibold' : ''
-                                                        }`}
-                                                    onClick={() => {
-                                                        setCurrentModel(model.model)
-                                                        localStorage.setItem('selectedModel', model.model)
-                                                        setShowModelDropdown(false)
-                                                    }}
-                                                >
-                                                    {model.name}
-                                                </button>
-                                            ))
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            <div>{currentModel}</div>
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowToolsDropdown(!showToolsDropdown)}
-                                    className="text-gray-700 hover:text-accent focus:outline-none"
-                                >
-                                    <PenTool size={24} />
-                                </button>
-                                {showToolsDropdown && (
-                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-white border border-gray-300 shadow-lg z-10">
-                                        <button
-                                            onClick={() => {
-                                                setShowImageGenOverlay(true)
-                                                setShowToolsDropdown(false)
-                                            }}
-                                            className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-secondary"
-                                        >
-                                            <ImagePlus size={18} />
-                                            <span>Image Generation</span>
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setWebSearch(!webSearch)
-                                                setShowToolsDropdown(false)
-                                            }}
-                                            className={`w-full px-4 py-2 text-left flex items-center gap-2 ${webSearch ? 'bg-gray-100' : 'hover:bg-secondary'
-                                                }`}
-                                        >
-                                            <Earth size={18} />
-                                            <span>Web Search</span>
-                                            {webSearch && (
-                                                <span className="ml-auto text-xs bg-green-800 text-white px-2 py-0.5">ON</span>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowModelDropdown(!showModelDropdown)}
+                                        className="text-gray-700 hover:text-accent cursor-pointer focus:outline-none"
+                                    >
+                                        <Layers size={24} />
+                                    </button>
+                                    {showModelDropdown && (
+                                        <div className="absolute bottom-full mb-2 left-0 w-40 bg-white border border-gray-300 shadow-lg text-sm z-10">
+                                            {loading ? (
+                                                <div className="p-2 text-gray-500">Loading models...</div>
+                                            ) : (
+                                                models.map((model) => (
+                                                    <button
+                                                        key={model.model}
+                                                        className={`w-full px-4 py-2 text-left hover:bg-secondary ${currentModel === model.model ? 'bg-primary font-semibold' : ''
+                                                            }`}
+                                                        onClick={() => {
+                                                            setCurrentModel(model.model)
+                                                            localStorage.setItem('selectedModel', model.model)
+                                                            setShowModelDropdown(false)
+                                                        }}
+                                                    >
+                                                        {model.name}
+                                                    </button>
+                                                ))
                                             )}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div>{currentModel}</div>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowToolsDropdown(!showToolsDropdown)}
+                                        className="text-gray-700 hover:text-accent focus:outline-none"
+                                    >
+                                        <PenTool size={24} />
+                                    </button>
+                                    {showToolsDropdown && (
+                                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-white border border-gray-300 shadow-lg z-10">
+                                            <button
+                                                onClick={() => {
+                                                    setShowImageGenOverlay(true)
+                                                    setShowToolsDropdown(false)
+                                                }}
+                                                className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-secondary"
+                                            >
+                                                <ImagePlus size={18} />
+                                                <span>Image Generation</span>
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setWebSearch(!webSearch)
+                                                    setShowToolsDropdown(false)
+                                                }}
+                                                className={`w-full px-4 py-2 text-left flex items-center gap-2 ${webSearch ? 'bg-gray-100' : 'hover:bg-secondary'
+                                                    }`}
+                                            >
+                                                <Earth size={18} />
+                                                <span>Web Search</span>
+                                                {webSearch && (
+                                                    <span className="ml-auto text-xs bg-green-800 text-white px-2 py-0.5">ON</span>
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Right: Send Button */}
