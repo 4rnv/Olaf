@@ -119,6 +119,7 @@ const ImageGenOverlay = ({ isOpen, onClose }: ImageGenOverlayProps) => {
 const App = () => {
     const [models, setModels] = useState<Model[]>([])
     const [loading, setLoading] = useState(true)
+    const [replying, setReplying] = useState(false)
     const [chatHistory, setChatHistory] = useState<{ role: string, content: string }[]>([])
     const [currentPrompt, setCurrentPrompt] = useState('')
     const [currentModel, setCurrentModel] = useState('')
@@ -178,6 +179,7 @@ const App = () => {
         setChatHistory(updatedChat)
         setCurrentPrompt('')
         setStats('')
+        setReplying(true)
         localStorage.setItem(activeChatId!, JSON.stringify(updatedChat))
 
         let finalMessages = updatedChat
@@ -238,63 +240,11 @@ const App = () => {
                 setChatHistory(finalChatHistory)
                 localStorage.setItem(activeChatId!, JSON.stringify(finalChatHistory))
                 setTypingText('')
+                setReplying(false)
             })
         } catch (error) {
             console.error("Error generating response:", error)
         }
-    }
-
-    const ToolsDropdown = () => {
-        const dropdownRef = useRef<HTMLDivElement>(null)
-        useEffect(() => {
-            const handleClickOutside = (event: MouseEvent) => {
-                if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                    setShowToolsDropdown(false)
-                }
-            }
-            document.addEventListener('mousedown', handleClickOutside)
-            return () => document.removeEventListener('mousedown', handleClickOutside)
-        }, [])
-
-        const handleToolSelect = (toolId: string) => {
-            if (toolId === 'image-gen') {
-                setShowImageGenOverlay(true)
-            } else if (toolId === 'web-search') {
-                setWebSearch(!webSearch)
-            }
-            setShowToolsDropdown(false)
-        }
-
-        return (
-            <div className="relative inline-block" ref={dropdownRef}>
-                <button
-                    onClick={() => setShowToolsDropdown(!showToolsDropdown)}
-                    className="flex items-center p-4"
-                >
-                    <PenTool size={32} />
-                </button>
-
-                {showToolsDropdown && (
-                    <div className="absolute bottom-full left-0 mb-2 w-48 bg-white z-10">
-                        <button
-                            onClick={() => handleToolSelect('image-gen')}
-                            className="w-full px-4 py-2 text-left flex items-center gap-2"
-                        >
-                            <ImagePlus size={20} />
-                            <span>Image Generation</span>
-                        </button>
-                        <button
-                            onClick={() => handleToolSelect('web-search')}
-                            className={`w-full px-4 py-2 text-left flex items-center gap-2 ${webSearch ? 'bg-blue-200' : ''}`}
-                        >
-                            <Earth size={20} />
-                            <span>Web Search</span>
-                            {webSearch && <span className="ml-auto text-xs bg-green-800 text-white px-2 py-1">ON</span>}
-                        </button>
-                    </div>
-                )}
-            </div>
-        )
     }
 
     const performWebSearch = async (query: string) => {
@@ -696,7 +646,7 @@ const App = () => {
                             {showAvatars && msg.role === 'user' && (<img src={userAvatar || "/user-avatar.png"} alt="(You)" className="w-16 h-16 rounded-img" />)}
                         </div>
                     ))}
-
+                    {replying && (<img src="/spinner.gif" alt="Loading reply" className='w-16 h-16'/>)}
                     {typingText && (
                         <div className="flex justify-start">
                             <div className="max-w-[60%] px-4 py-2 shadow bg-gray-300 text-black">
@@ -815,7 +765,10 @@ const App = () => {
 
                             {/* Right: Send Button */}
                             <button
-                                onClick={handleSendRequest}
+                                onClick={() => {
+                                    handleSendRequest
+                                    setReplying(true)
+                                }}
                                 className="text-gray-700 hover:text-accent focus:outline-none"
                             >
                                 <SendHorizonal size={24} />
