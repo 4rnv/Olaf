@@ -1,10 +1,6 @@
-# Olaf ❄️ | Ollama Frontend
+# Olaf ❄️
 
-A local interface for interacting with Ollama through chat. Features include running multiple sessions, persistent history, chat export and theming. Built in React + TypeScript + Vite.
-
-<img src="./images/ss1.png" width=1000 style="margin-bottom:10px;">
-
-<img src="./images/ss2.png" width=1000 style="margin-bottom:10px;">
+A GUI for interacting with Ollama through chat. Features include web search for up to date results, running multiple sessions, persistent history, chat export and theming. Built with React + TypeScript + Vite.
 
 ### Installation & Usage
 - Clone this repo.
@@ -15,20 +11,15 @@ A local interface for interacting with Ollama through chat. Features include run
 
 ### Features
 
-- Set a custom username.
-- Upload avatars for both the user and assistant (bot).
-- Each chat session is saved in localStorage.
-- Markdown rendering of replies.
+- Web search
+- Image generation API (Pollinations)
 - Sessions can be:
     - Deleted (individually or all at once).
     - Exported in .txt, .md, or .json formats.
-
-<img src="./images/ss3.png" width=300 style="margin-bottom:10px;">
+- Upload avatars for both the user and assistant (bot).
+- Each chat session is saved in localStorage.
+- Markdown rendering of replies.
 
 Themes:
 
-<img src="./images/themes.png" width=300>
-
-### Future Work
-
-- Ability to search the web for live information.
+<img src="./images/themes.png" width=100>
