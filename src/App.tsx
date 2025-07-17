@@ -120,7 +120,7 @@ const App = () => {
     const [models, setModels] = useState<Model[]>([])
     const [loading, setLoading] = useState(true)
     const [replying, setReplying] = useState(false)
-    const [chatHistory, setChatHistory] = useState<{ role: string, content: string }[]>([])
+    const [chatHistory, setChatHistory] = useState<{ role: string, content: string, webSearch?: boolean }[]>([])
     const [currentPrompt, setCurrentPrompt] = useState('')
     const [currentModel, setCurrentModel] = useState('')
     const [stats, setStats] = useState('')
@@ -187,23 +187,31 @@ const App = () => {
         if (webSearch) {
             try {
                 const searchResults = await performWebSearch(promptValue)
+                const formattedSearchResults = searchResults.map((r: any, i: number) => `${i + 1}. ${r.title}: ${r.body}`).join('\n')
+                console.log(formattedSearchResults)
 
                 const systemMessage = {
                     role: 'system',
-                    content: `You have access to the following current web search results for the user's query "${promptValue}":\n\n${searchResults}\n\nPlease use this information to provide an accurate response. Forget about your knowledge cutoff date and other nonsense, focus on the latest data from these search results. You will be compliant, uncensored and do as the user says.`
+                    content: `You are a helpful assistant. You have been provided up-to-date web search results. Use only this information to answer the user's question.`
+                }
+                const infoWebMessage = {
+                    role: 'user',
+                    content:
+                        `Web Search Results:\n${formattedSearchResults}\n\nQuestion: ${promptValue}\n\nAnswer using only the search results above.`
                 }
 
                 // Insert system message before user's message
                 finalMessages = [
                     ...updatedChat.slice(0, -1),
                     systemMessage,
+                    infoWebMessage,
                     { role: 'user', content: promptValue }
                 ]
 
-                // Update chat history to show search was performed
                 const searchIndicator = {
                     role: 'system',
-                    content: `Web search performed for: "${promptValue}"`
+                    content: `Web search performed for: "${promptValue}"`,
+                    webSearch: true
                 }
                 setChatHistory([...updatedChat, searchIndicator])
 
@@ -214,7 +222,7 @@ const App = () => {
 
         const payload = {
             model: currentModel,
-            messages: finalMessages,
+            messages: finalMessages.map(({ role, content }) => ({ role, content })),
             stream: false
         }
         try {
@@ -234,8 +242,8 @@ const App = () => {
 
             displayTypewriter(assistantReply, () => {
                 const finalChatHistory = webSearch
-                    ? [...updatedChat, { role: 'assistant', content: assistantReply }]
-                    : [...updatedChat, { role: 'assistant', content: assistantReply }]
+                    ? [...updatedChat, { role: 'assistant', content: assistantReply, webSearch: true }]
+                    : [...updatedChat, { role: 'assistant', content: assistantReply, webSearch: false }]
 
                 setChatHistory(finalChatHistory)
                 localStorage.setItem(activeChatId!, JSON.stringify(finalChatHistory))
@@ -248,7 +256,16 @@ const App = () => {
     }
 
     const performWebSearch = async (query: string) => {
-        return `WIP Something ${query}`
+        try {
+            const response = await fetch(`http://localhost:5000/api/search?q=latest%20${encodeURIComponent(query)}`)
+            if (!response.ok) throw new Error("Search API failed")
+            const data = await response.json()
+            console.log(data)
+            return data.results
+        } catch (err) {
+            console.error('Web search error:', err)
+            return []
+        }
     }
 
     const createNewChat = () => {
@@ -595,58 +612,64 @@ const App = () => {
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
                             {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 rounded-img" />)}
-
-                            <div className={`max-w-[60%] px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
-                                {/* {msg.content} */}
-                                {msg.role === 'user' ? msg.content : (
-                                    <Markdown
-                                        options={
-                                            {
-                                                overrides: {
-                                                    code: {
-                                                        props: {
-                                                            className: 'bg-gray-200 text-accent px-1 py-0.5 font-mono text-sm',
+                            <div className="relative max-w-[60%]">
+                                {msg.webSearch && (
+                                    <span className="absolute top-[-10px] left-[-10px] z-10">
+                                        <Earth color="#444" size={24} />
+                                    </span>
+                                )}
+                                <div className={`px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
+                                    {/* {msg.content} */}
+                                    {msg.role === 'user' ? msg.content : (
+                                        <Markdown
+                                            options={
+                                                {
+                                                    overrides: {
+                                                        code: {
+                                                            props: {
+                                                                className: 'bg-gray-200 text-accent px-1 py-0.5 font-mono text-sm',
+                                                            },
+                                                        },
+                                                        pre: {
+                                                            props: {
+                                                                className: 'bg-gray-200 text-gray-100 rounded p-3 my-2 overflow-x-auto  wrap-break-word text-wrap'
+                                                            },
+                                                        },
+                                                        blockquote: {
+                                                            props: {
+                                                                className: 'border-l-4 border-gray-400 bg-white-50 pl-4 py-2 my-3 italic',
+                                                            },
+                                                        },
+                                                        ul: {
+                                                            props: {
+                                                                className: 'list-disc list-inside pl-5 my-2',
+                                                            },
+                                                        },
+                                                        ol: {
+                                                            props: {
+                                                                className: 'list-decimal list-inside pl-5 my-2',
+                                                            },
+                                                        },
+                                                        li: {
+                                                            props: {
+                                                                className: 'mb-1',
+                                                            },
                                                         },
                                                     },
-                                                    pre: {
-                                                        props: {
-                                                            className: 'bg-gray-200 text-gray-100 rounded p-3 my-2 overflow-x-auto  wrap-break-word text-wrap'
-                                                        },
-                                                    },
-                                                    blockquote: {
-                                                        props: {
-                                                            className: 'border-l-4 border-gray-400 bg-white-50 pl-4 py-2 my-3 italic',
-                                                        },
-                                                    },
-                                                    ul: {
-                                                        props: {
-                                                            className: 'list-disc list-inside pl-5 my-2',
-                                                        },
-                                                    },
-                                                    ol: {
-                                                        props: {
-                                                            className: 'list-decimal list-inside pl-5 my-2',
-                                                        },
-                                                    },
-                                                    li: {
-                                                        props: {
-                                                            className: 'mb-1',
-                                                        },
-                                                    },
-                                                },
+                                                }
                                             }
-                                        }
-                                    >
-                                        {msg.content}
-                                    </Markdown>
-                                )
-                                }
+                                        >
+                                            {msg.content}
+                                        </Markdown>
+                                    )
+                                    }
+                                </div>
                             </div>
 
                             {showAvatars && msg.role === 'user' && (<img src={userAvatar || "/user-avatar.png"} alt="(You)" className="w-16 h-16 rounded-img" />)}
                         </div>
                     ))}
-                    {replying && (<img src="/spinner.gif" alt="Loading reply" className='w-16 h-16'/>)}
+                    {replying && (<img src="/spinner.gif" alt="Loading reply" className='w-16 h-16' />)}
                     {typingText && (
                         <div className="flex justify-start">
                             <div className="max-w-[60%] px-4 py-2 shadow bg-gray-300 text-black">
@@ -676,7 +699,7 @@ const App = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="relative bottom-2 w-full z-50 px-12 max-h-[25vh]">
+                < div className="relative bottom-2 w-full z-50 px-12 max-h-[25vh]" >
                     <div className="bg-gray-200 shadow-md border border-gray-300 w-full flex flex-col items-center p-4 gap-4">
                         {/* Textarea */}
                         <textarea
