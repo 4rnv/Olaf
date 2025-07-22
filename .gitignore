@@ -5,3 +5,5 @@ dist
 .vscode/*
 TODO.txt
 *new.tsx
+*__pycache__/
+*envinaba/
