@@ -600,7 +600,7 @@ const App = () => {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-gray-100 justify-evenly">
+            <div className="flex-1 flex flex-col bg-white justify-evenly">
                 <div className="flex items-center justify-start p-4 gap-1">
                     {!sidebarOpen && (
                         <SidebarOpen onClick={() => setSidebarOpen(true)} className="hover:text-hover" />
@@ -608,7 +608,7 @@ const App = () => {
                     <div className="text-gray-500 text-sm mt-1">{stats}</div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto py-4 px-12 space-y-4">
+                <div className="flex-1 overflow-y-auto pb-20 pt-10 px-12 space-y-4">
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
                             {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 rounded-img" />)}
@@ -618,7 +618,7 @@ const App = () => {
                                         <Earth color="#444" size={24} />
                                     </span>
                                 )}
-                                <div className={`px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-black bot-message'}`}>
+                                <div className={`px-4 py-2 shadow ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-200 text-black bot-message'}`}>
                                     {/* {msg.content} */}
                                     {msg.role === 'user' ? msg.content : (
                                         <Markdown
@@ -699,12 +699,12 @@ const App = () => {
                 </div>
 
                 {/* Footer */}
-                < div className="relative bottom-2 w-full z-50 px-12 max-h-[25vh]" >
-                    <div className="bg-gray-200 shadow-md border border-gray-300 w-full flex flex-col items-center p-4 gap-4">
+                < div className="relative bottom-8 w-full z-50 px-30 max-h-[25vh]" >
+                    <div className="bg-gray-100 shadow-md border border-gray-300 w-full flex flex-col items-center p-4 gap-4">
                         {/* Textarea */}
                         <textarea
                             required
-                            className="w-full h-24 px-4 py-3 bg-gray-200 text-black resize-none focus:outline-none focus:ring-2 focus:border-accent"
+                            className="w-full h-24 px-4 py-3 bg-gray-100 text-black resize-none focus:outline-none focus:ring-2 focus:border-accent"
                             placeholder="Type your message..."
                             value={currentPrompt}
                             onChange={(e) => setCurrentPrompt(e.target.value)}
@@ -762,7 +762,7 @@ const App = () => {
                                                     setShowImageGenOverlay(true)
                                                     setShowToolsDropdown(false)
                                                 }}
-                                                className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-secondary"
+                                                className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-200"
                                             >
                                                 <ImagePlus size={18} />
                                                 <span>Image Generation</span>
@@ -772,7 +772,7 @@ const App = () => {
                                                     setWebSearch(!webSearch)
                                                     setShowToolsDropdown(false)
                                                 }}
-                                                className={`w-full px-4 py-2 text-left flex items-center gap-2 ${webSearch ? 'bg-gray-100' : 'hover:bg-secondary'
+                                                className={`w-full px-4 py-2 text-left flex items-center gap-2 ${webSearch ? 'bg-gray-100' : 'hover:bg-gray-200'
                                                     }`}
                                             >
                                                 <Earth size={18} />
