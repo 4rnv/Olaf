@@ -272,7 +272,7 @@ const App = () => {
         const timestamp = Date.now()
         const newChatId = `olaf-session-${timestamp}`
         const newChatTitle = `Chat ${new Date(timestamp).toLocaleString()}`
-        setChatSessions(prev => [...prev, { id: newChatId, title: newChatTitle, timestamp: timestamp }])
+        setChatSessions(prev => [...prev, { id: newChatId, title: newChatTitle }])
         setActiveChatId(newChatId)
         setStats('')
         setChatHistory([])
@@ -495,7 +495,7 @@ const App = () => {
                                 <li key={session.id} className={`cursor-pointer hover:bg-hover p-2 text-sm ${activeChatId === session.id ? 'font-bold bg-accent' : ''}`} onClick={() => loadChatSession(session.id)}>
                                     <div className="flex justify-between items-center gap-2">
                                         <span className="flex-1 truncate cursor-pointer" onClick={() => loadChatSession(session.id)}>
-                                            {session.title}
+                                            {new Date(session.title).toLocaleString("en-GB")}
                                         </span>
                                         <div className="flex gap-2 items-center">
 
@@ -732,7 +732,7 @@ const App = () => {
                                                 models.map((model) => (
                                                     <button
                                                         key={model.model}
-                                                        className={`w-full px-4 py-2 text-left hover:bg-secondary ${currentModel === model.model ? 'bg-primary font-semibold' : ''
+                                                        className={`w-full px-4 py-2 text-left hover:bg-secondary hover:text-gray-300 ${currentModel === model.model ? 'bg-primary font-semibold text-gray-300' : ''
                                                             }`}
                                                         onClick={() => {
                                                             setCurrentModel(model.model)
