@@ -42,10 +42,6 @@ def search():
         print(e)
     return jsonify({'results': results})
 
-async def _to_sync(agen):
-    async for chunk in agen:
-        yield chunk
-
 @app.route('/api/tts', methods=["GET", "POST"])
 @cross_origin()
 def tts():
