@@ -686,6 +686,18 @@ const App = () => {
                                                                 className: 'mb-1',
                                                             },
                                                         },
+                                                        think: {
+                                                            component: (props: any) => (
+                                                                <details className="p-1">
+                                                                    <summary className="cursor-pointer text-xs  text-mono text-gray-500 italic">
+                                                                        Show thinking
+                                                                    </summary>
+                                                                    <div className="mt-1 text-sm text-gray-700 italic">
+                                                                        {props.children}
+                                                                    </div>
+                                                                </details>
+                                                            ),
+                                                        },
                                                     },
                                                 }
                                             }
