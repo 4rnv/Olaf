@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, Response, jsonify
 from ddgs import DDGS
 from ddgs.exceptions import (
     DDGSException,
@@ -6,8 +6,10 @@ from ddgs.exceptions import (
     TimeoutException,
 )
 from flask_cors import cross_origin
+import edge_tts
 from plugins.sample import SamplePlugin
 from plugins.file_access import FileAccessPlugin
+import asyncio
 
 app = Flask(__name__)
 PLUGINS = {
@@ -39,6 +41,40 @@ def search():
     except (DDGSException, RatelimitException, TimeoutException) as e:
         print(e)
     return jsonify({'results': results})
+
+async def _to_sync(agen):
+    async for chunk in agen:
+        yield chunk
+
+@app.route('/api/tts', methods=["GET", "POST"])
+@cross_origin()
+def tts():
+    VOICE = 'en-GB-LibbyNeural'
+    query = request.args.get("q", "")
+    if not query:
+        return jsonify({"error": "No query provided"}), 400
+
+    async def tts_generator():
+        communicate = edge_tts.Communicate(query, VOICE)
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                yield chunk["data"]
+
+    def sync_generator():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        agen = tts_generator()
+
+        try:
+            while True:
+                chunk = loop.run_until_complete(agen.__anext__())
+                yield chunk
+        except StopAsyncIteration:
+            pass
+        finally:
+            loop.close()
+
+    return Response(sync_generator(), mimetype="audio/mpeg")
 
 if __name__=='__main__':
     app.run(debug=True)

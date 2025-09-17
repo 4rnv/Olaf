@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import Markdown from 'markdown-to-jsx'
-import { Trash2, FileDown, PenTool, ImagePlus, Earth, SidebarClose, MessageCirclePlus, SidebarOpen, SendHorizonal, Layers } from "lucide-react"
+import { Trash2, FileDown, PenTool, ImagePlus, Earth, SidebarClose, MessageCirclePlus, SidebarOpen, SendHorizonal, Layers, Mic } from "lucide-react"
 import { UserX, BotIcon, EyeOff, Eye, BotOff, UserPlus } from "lucide-react"
 import { Model, ApiResponse, ImageResponse, ImageGenOverlayProps } from './Interfaces'
 import './App.css'
@@ -478,6 +478,26 @@ const App = () => {
         return () => document.removeEventListener('mouseup', handleSelection)
     }, [])
 
+    const handleTTS = async (text: string) => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/api/tts?q=${encodeURIComponent(text)}`
+            )
+
+            if (!response.ok) {
+                console.error("TTS request failed")
+                return
+            }
+
+            const blob = await response.blob()
+            const url = URL.createObjectURL(blob)
+            const audio = new Audio(url)
+            audio.play()
+        } catch (err) {
+            console.error("Error in TTS: ", err)
+        }
+    }
+
     return (
         <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
@@ -612,6 +632,17 @@ const App = () => {
                     {Array.isArray(chatHistory) && chatHistory!.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-2`}>
                             {showAvatars && msg.role === 'assistant' && (<img src={botAvatar || "/bot-avatar.png"} alt="Bot" className="w-16 h-16 rounded-img" />)}
+                            {msg.role === 'assistant' && (
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        handleTTS(msg.content)
+                                    }}
+                                    title="Play TTS"
+                                >
+                                    <Mic size={20} />
+                                </button>
+                            )}
                             <div className="relative max-w-[60%]">
                                 {msg.webSearch && (
                                     <span className="absolute top-[-10px] left-[-10px] z-10">
